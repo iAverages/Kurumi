@@ -17,6 +17,7 @@ import {
     Box,
     useColorModeValue,
 } from "@chakra-ui/react";
+import ErrorBox from "../components/errorBox";
 
 interface NoteProps {
     note: INote;
@@ -80,13 +81,7 @@ const NotePage = ({ note, errored }: NoteProps) => {
                 <meta name="description" content={note.body?.substring(0, 50)} />
             </Head>
             <Nav title={<NoteName note={note} />} />
-            {errored ? (
-                <Box bg={useColorModeValue("red.500", "red.300")} boxShadow={"2xl"} rounded={"md"} m={6} p={6}>
-                    Error occured fetching note
-                </Box>
-            ) : (
-                <Editor content={note.body} />
-            )}
+            {errored ? <ErrorBox text={"Error occured fetching note"} /> : <Editor content={note.body} />}
         </div>
     );
 };

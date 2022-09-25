@@ -8,6 +8,7 @@ import Nav from "../components/navbar";
 import Note, { INote } from "../database/models/Note";
 import { Heading, Box, Text, Flex, Center, useColorModeValue, Avatar, Stack, Spacer, SimpleGrid } from "@chakra-ui/react";
 import dbConnect from "../database/connect";
+import ErrorBox from "../components/errorBox";
 
 const NoteBox: FC<{ note: INote }> = ({ note }) => {
     const handleClick = () => Router.push(`/${note._id}`);
@@ -82,9 +83,7 @@ const Home: NextPage<{ notes: INote[]; errored: boolean }> = ({ notes, errored }
             <Nav title="Your Notes" />
             <Box paddingInline={"2rem"}>
                 {errored ? (
-                    <Box bg={useColorModeValue("red.500", "red.300")} boxShadow={"2xl"} rounded={"md"} m={6} p={6}>
-                        Error occured fetching notes
-                    </Box>
+                    <ErrorBox text={"Error occured fetching notes"} />
                 ) : (
                     <>
                         <Heading>Your Notes</Heading>
