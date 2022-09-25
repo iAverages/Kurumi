@@ -24,6 +24,7 @@ import {
     PopoverCloseButton,
     PopoverHeader,
     PopoverBody,
+    Text,
 } from "@chakra-ui/react";
 
 interface IndexProps {
@@ -81,6 +82,8 @@ const Nav: FC<IndexProps> = ({ title }) => {
                                         <p>dan</p>
                                     </Center>
                                     <br />
+                                    <MenuDivider />
+                                    <Text marginLeft={2}>Commit: {process.env.COMMIT_HASH}</Text>
                                     <MenuDivider />
                                     <MenuItem>Logout</MenuItem>
                                 </MenuList>

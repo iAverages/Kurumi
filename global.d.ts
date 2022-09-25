@@ -3,5 +3,6 @@ namespace NodeJS {
         NODE_ENV: string;
         PORT: string;
         MONGO_URI: string;
+        COMMIT_HASH: string;
     }
 }
