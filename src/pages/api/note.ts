@@ -18,7 +18,15 @@ const PATCH = async (req: NextApiRequest, res: NextApiResponse) => {
         if (!req.body.id) {
             return res.status(400).send({ success: false, message: "ID is required" });
         }
-        const note = await Note.updateOne({ _id: req.body.id }, {});
+        if (!req.body.name && req.body.body) {
+            return res.status(400).send({ success: false, message: "Either name or body is required" });
+        }
+
+        const update: Record<string, string> = {};
+        if (req.body.name) update.name = req.body.name;
+        if (req.body.body) update.body = req.body.body;
+
+        const note = await Note.updateOne({ _id: req.body.id }, update);
         console.log(`Note ${req.body.id} was updated`);
         return res.send({ success: note.modifiedCount > 0 });
     } catch (e) {

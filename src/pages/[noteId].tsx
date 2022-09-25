@@ -29,11 +29,19 @@ const NoteName: FC<{ note: INote }> = ({ note }) => {
         try {
             // TODO: Change to use websocket so I can broadcast
             // to other clients viewing the note
+            console.log({
+                name: newName,
+                id: note,
+            });
             fetch("/api/note", {
                 method: "PATCH",
                 body: JSON.stringify({
                     name: newName,
+                    id: note._id,
                 }),
+                headers: {
+                    "Content-Type": "application/json",
+                },
             });
         } catch (e) {}
     };
