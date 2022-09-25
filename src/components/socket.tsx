@@ -2,14 +2,14 @@ import { useToast } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { useWebsocket } from "../hooks/useWebsocket";
-import { SocketEvents } from "../socketEvents";
 
 export interface ISocketContext {
     socket: Socket;
 }
-const socket = io();
 
-export const SocketContext = React.createContext<ISocketContext>({ socket /*registerEvent: new Map()*/ });
+const socket = io({ reconnection: true, reconnectionDelay: 2000 });
+
+export const SocketContext = React.createContext<ISocketContext>({ socket });
 
 /**
  * Contains base logic for websocket connection
