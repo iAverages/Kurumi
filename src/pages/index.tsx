@@ -111,7 +111,7 @@ const Home: NextPage<{ _notes: INote[]; errored: boolean }> = ({ _notes, errored
                 <meta name="description" content="Note taking app" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            {/* <Nav title="Your Notes" /> */}
+            <Nav title="Your Notes" />
             <Box paddingInline={"2rem"}>
                 {errored ? (
                     <ErrorBox text={"Error occured fetching notes"} />

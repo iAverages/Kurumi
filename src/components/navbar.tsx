@@ -31,7 +31,7 @@ interface IndexProps {
 }
 
 const Nav: FC<IndexProps> = ({ title }) => {
-    const { colorMode, toggleColorMode } = useColorMode();
+    const { toggleColorMode } = useColorMode();
     const { connected } = useWebsocket();
 
     return (
