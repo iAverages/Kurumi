@@ -27,8 +27,11 @@ const PATCH = async (req: NextApiRequest, res: NextApiResponse) => {
         if (req.body.body) update.body = req.body.body;
 
         const note = await Note.updateOne({ _id: req.body.id }, update);
-        console.log(`Note ${req.body.id} was updated`);
-        return res.send({ success: note.modifiedCount > 0 });
+        const success = note.modifiedCount > 0;
+        if (success) {
+            console.log(`Note ${req.body.id} was updated`);
+        }
+        return res.send({ success });
     } catch (e) {
         console.log(e);
         return res.status(500);
@@ -41,9 +44,12 @@ const DELETE = async (req: NextApiRequest, res: NextApiResponse) => {
         if (!req.body.id) {
             return res.status(400).send({ success: false, message: "ID is required" });
         }
-        const note = await Note.deleteOne({ _id: req.body.id });
-        console.log(`Note ${req.body.id} was deleted`);
-        return res.send({ success: note.deletedCount > 0 });
+        const note = await Note.updateOne({ _id: req.body.id }, { archived: true });
+        const success = note.modifiedCount > 0;
+        if (note.modifiedCount > 0) {
+            console.log(`Note ${req.body.id} was archived`);
+        }
+        return res.send({ success });
     } catch (e) {
         console.log(e);
         return res.status(500);

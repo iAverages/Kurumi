@@ -5,12 +5,14 @@ export interface INote extends Document {
     body: string;
     createdAt: Date;
     updatedAt: Date;
+    archived: boolean;
 }
 
 export const noteSchema = new Schema<INote>(
     {
         name: { type: String, required: true, trim: true },
         body: { type: String, default: "", trim: true },
+        archived: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

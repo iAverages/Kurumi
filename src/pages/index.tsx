@@ -1,8 +1,8 @@
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import { DeleteIcon } from "@chakra-ui/icons";
-import { Button } from "@chakra-ui/react";
+import { Button, useToast } from "@chakra-ui/react";
 import Router from "next/router";
 import Nav from "../components/navbar";
 import Note, { INote } from "../database/models/Note";
@@ -10,8 +10,29 @@ import { Heading, Box, Text, Flex, Center, useColorModeValue, Avatar, Stack, Spa
 import dbConnect from "../database/connect";
 import ErrorBox from "../components/errorBox";
 
-const NoteBox: FC<{ note: INote }> = ({ note }) => {
+const NoteBox: FC<{ note: INote; removeNote: (id: string) => void }> = ({ note, removeNote }) => {
+    const toast = useToast();
     const handleClick = () => Router.push(`/${note._id}`);
+
+    const handleDelete = async () => {
+        const response = await fetch("/api/note", {
+            method: "DELETE",
+            body: JSON.stringify({
+                id: note._id,
+            }),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }).then((res) => res.json());
+        const success = response.success;
+        toast({
+            status: success ? "success" : "error",
+            title: success ? "Note was successfully deleted" : "Failed to delete note.",
+            isClosable: true,
+        });
+        removeNote(note._id);
+    };
+
     return (
         <Center py={6}>
             <Box
@@ -37,7 +58,7 @@ const NoteBox: FC<{ note: INote }> = ({ note }) => {
                             Private
                         </Text>
                         <Spacer />
-                        <Button alignSelf={"self-end"} _hover={{ bg: "red.300" }}>
+                        <Button alignSelf={"self-end"} _hover={{ bg: "red.300" }} onClick={handleDelete}>
                             {<DeleteIcon />}
                         </Button>
                     </Flex>
@@ -65,12 +86,22 @@ const NoteBox: FC<{ note: INote }> = ({ note }) => {
     );
 };
 
-const Home: NextPage<{ notes: INote[]; errored: boolean }> = ({ notes, errored }) => {
+const Home: NextPage<{ _notes: INote[]; errored: boolean }> = ({ _notes, errored }) => {
+    const [notes, setNotes] = useState<INote[]>(_notes ?? []);
+
+    useEffect(() => {
+        setNotes(_notes);
+    }, [_notes]);
+
     const handleCreateNote = async () => {
         const response = await fetch("/api/note", {
             method: "POST",
         }).then((res) => res.json());
         Router.push(response._id);
+    };
+
+    const removeNote = (id: string) => {
+        setNotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
     };
 
     return (
@@ -80,7 +111,7 @@ const Home: NextPage<{ notes: INote[]; errored: boolean }> = ({ notes, errored }
                 <meta name="description" content="Note taking app" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <Nav title="Your Notes" />
+            {/* <Nav title="Your Notes" /> */}
             <Box paddingInline={"2rem"}>
                 {errored ? (
                     <ErrorBox text={"Error occured fetching notes"} />
@@ -92,7 +123,8 @@ const Home: NextPage<{ notes: INote[]; errored: boolean }> = ({ notes, errored }
                         </Button>
                         <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
                             {notes?.map((note, idx) => (
-                                <NoteBox key={idx} note={note} />
+                                // Change this "removeNote"?
+                                <NoteBox key={idx} note={note} removeNote={removeNote} />
                             ))}
                         </SimpleGrid>
                     </>
@@ -104,8 +136,12 @@ const Home: NextPage<{ notes: INote[]; errored: boolean }> = ({ notes, errored }
 
 export async function getServerSideProps() {
     const connected = await dbConnect();
-    const notes = connected ? await Note.find({}) : [];
-    return { props: { errored: !connected, notes: JSON.parse(JSON.stringify(notes)) } };
+    const notes = connected
+        ? await Note.find({
+              $or: [{ archived: { $exists: false } }, { archived: false }],
+          })
+        : [];
+    return { props: { errored: !connected, _notes: JSON.parse(JSON.stringify(notes)) } };
 }
 
 export default Home;
