@@ -117,10 +117,12 @@ const Home: NextPage<{ _notes: INote[]; errored: boolean }> = ({ _notes, errored
                     <ErrorBox text={"Error occured fetching notes"} />
                 ) : (
                     <>
-                        <Heading>Your Notes</Heading>
-                        <Button colorScheme="purple" onClick={handleCreateNote}>
-                            Create Note
-                        </Button>
+                        <Box display={"flex"} gap={"1rem"} mt={"1rem"} alignContent={"center"}>
+                            <Heading>Your Notes</Heading>
+                            <Button colorScheme="purple" onClick={handleCreateNote}>
+                                Create Note
+                            </Button>
+                        </Box>
                         <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
                             {notes?.map((note, idx) => (
                                 // Change this "removeNote"?
