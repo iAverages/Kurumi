@@ -27,17 +27,26 @@ async function dbConnect() {
     }
 
     if (!cached.promise) {
-        cached.promise = mongoose.connect(MONGODB_URI, { dbName: "notes" }).then((mongoose) => {
-            console.log("Connected to mongo");
-            return mongoose;
-        });
+        cached.promise = mongoose
+            .connect(MONGODB_URI, {
+                dbName: "notes",
+                socketTimeoutMS: 10000,
+                connectTimeoutMS: 10000,
+            })
+            .then((mongoose) => {
+                console.log("Connected to mongo");
+                return mongoose;
+            });
     }
 
     try {
         cached.conn = await cached.promise;
     } catch (e) {
         cached.promise = null;
-        throw e;
+        // Failed to connect
+        cached.conn = null;
+        console.error("Failed to to connect to mongo");
+        console.error(e);
     }
 
     return cached.conn;

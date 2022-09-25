@@ -14,13 +14,16 @@ import {
     Editable,
     EditableInput,
     Input,
+    Box,
+    useColorModeValue,
 } from "@chakra-ui/react";
 
 interface NoteProps {
     note: INote;
+    errored: boolean;
 }
 
-const NoteName: FC<NoteProps> = ({ note }) => {
+const NoteName: FC<{ note: INote }> = ({ note }) => {
     const handleNameUpdate = (newName: string) => {
         try {
             // TODO: Change to use websocket so I can broadcast
@@ -69,7 +72,7 @@ const NoteName: FC<NoteProps> = ({ note }) => {
     );
 };
 
-const NotePage = ({ note }: NoteProps) => {
+const NotePage = ({ note, errored }: NoteProps) => {
     return (
         <div style={{ height: "100%" }}>
             <Head>
@@ -77,20 +80,28 @@ const NotePage = ({ note }: NoteProps) => {
                 <meta name="description" content={note.body?.substring(0, 50)} />
             </Head>
             <Nav title={<NoteName note={note} />} />
-            <Editor content={note.body} />
+            {errored ? (
+                <Box bg={useColorModeValue("red.500", "red.300")} boxShadow={"2xl"} rounded={"md"} m={6} p={6}>
+                    Error occured fetching note
+                </Box>
+            ) : (
+                <Editor content={note.body} />
+            )}
         </div>
     );
 };
 
 export async function getServerSideProps({ params }: any) {
-    await dbConnect();
+    const connected = await dbConnect();
     let note: object = {};
-    try {
-        note = (await Note.findById(params.noteId)) ?? {};
-    } catch (e) {
-        // No note found
+    if (connected) {
+        try {
+            note = (await Note.findById(params.noteId)) ?? {};
+        } catch (e) {
+            // No note found
+        }
     }
-    return { props: { note: JSON.parse(JSON.stringify(note)) } };
+    return { props: { errored: !connected, note: JSON.parse(JSON.stringify(note)) } };
 }
 
 export default NotePage;

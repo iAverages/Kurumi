@@ -7,6 +7,7 @@ import Router from "next/router";
 import Nav from "../components/navbar";
 import Note, { INote } from "../database/models/Note";
 import { Heading, Box, Text, Flex, Center, useColorModeValue, Avatar, Stack, Spacer, SimpleGrid } from "@chakra-ui/react";
+import dbConnect from "../database/connect";
 
 const NoteBox: FC<{ note: INote }> = ({ note }) => {
     const handleClick = () => Router.push(`/${note._id}`);
@@ -63,7 +64,7 @@ const NoteBox: FC<{ note: INote }> = ({ note }) => {
     );
 };
 
-const Home: NextPage<{ notes: INote[] }> = ({ notes }) => {
+const Home: NextPage<{ notes: INote[]; errored: boolean }> = ({ notes, errored }) => {
     const handleCreateNote = async () => {
         const response = await fetch("/api/note", {
             method: "POST",
@@ -80,23 +81,32 @@ const Home: NextPage<{ notes: INote[] }> = ({ notes }) => {
             </Head>
             <Nav title="Your Notes" />
             <Box paddingInline={"2rem"}>
-                <Heading>Your Notes</Heading>
-                <Button colorScheme="purple" onClick={handleCreateNote}>
-                    Create Note
-                </Button>
-                <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
-                    {notes?.map((note, idx) => (
-                        <NoteBox key={idx} note={note} />
-                    ))}
-                </SimpleGrid>
+                {errored ? (
+                    <Box bg={useColorModeValue("red.500", "red.300")} boxShadow={"2xl"} rounded={"md"} m={6} p={6}>
+                        Error occured fetching notes
+                    </Box>
+                ) : (
+                    <>
+                        <Heading>Your Notes</Heading>
+                        <Button colorScheme="purple" onClick={handleCreateNote}>
+                            Create Note
+                        </Button>
+                        <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
+                            {notes?.map((note, idx) => (
+                                <NoteBox key={idx} note={note} />
+                            ))}
+                        </SimpleGrid>
+                    </>
+                )}
             </Box>
         </>
     );
 };
 
 export async function getServerSideProps() {
-    const notes = await Note.find({});
-    return { props: { notes: JSON.parse(JSON.stringify(notes)) } };
+    const connected = await dbConnect();
+    const notes = connected ? await Note.find({}) : [];
+    return { props: { errored: !connected, notes: JSON.parse(JSON.stringify(notes)) } };
 }
 
 export default Home;
