@@ -4,5 +4,6 @@ namespace NodeJS {
         PORT: string;
         MONGO_URI: string;
         COMMIT_HASH: string;
+        DB_NAME: string;
     }
 }

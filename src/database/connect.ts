@@ -8,6 +8,11 @@ if (!MONGODB_URI) {
     throw new Error("Please define the MONGODB_URI environment variable inside .env.local");
 }
 
+let dbName = "notes"
+if (process.env.DB_NAME) {
+    dbName = process.env.DB_NAME;
+}
+
 /**
  * Global is used here to maintain a cached connection across hot reloads
  * in development. This prevents connections growing exponentially
@@ -29,7 +34,7 @@ async function dbConnect() {
     if (!cached.promise) {
         cached.promise = mongoose
             .connect(MONGODB_URI, {
-                dbName: "notes",
+                dbName,
                 socketTimeoutMS: 10000,
                 connectTimeoutMS: 10000,
             })
