@@ -5,6 +5,8 @@ import Note, { INote } from "../database/models/Note";
 import Nav from "../components/navbar";
 import ErrorBox from "../components/errorBox";
 import NoteTitle from "../components/NoteTitle";
+import { Box } from "@chakra-ui/react";
+import { useEffect, useState } from "react";
 
 interface NoteProps {
     note: INote;
@@ -12,14 +14,20 @@ interface NoteProps {
 }
 
 const NotePage = ({ note, errored }: NoteProps) => {
+    const [title, setTitle] = useState(note.name);
+
+    useEffect(() => setTitle(note.name?.substring(0, 50) + " | Kurumi"), [note, note.name]);
+
     return (
         <div style={{ height: "100%" }}>
             <Head>
-                <title>{note.name.substring(0, 50)} | Kurumi</title>
+                <title>{title}</title>
                 <meta name="description" content={note.body?.substring(0, 150) ?? "Note has no body"} />
             </Head>
-            <Nav title={<NoteTitle note={note} />} />
-            {errored ? <ErrorBox text={"Error occured fetching note"} /> : <Editor content={note.body} />}
+            <Box h={"100%"}>
+                <Nav title={<NoteTitle note={note} />} />
+                {errored ? <ErrorBox text={"Error occured fetching note"} /> : <Editor content={note.body} />}
+            </Box>
         </div>
     );
 };
