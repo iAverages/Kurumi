@@ -15,8 +15,8 @@ const NotePage = ({ note, errored }: NoteProps) => {
     return (
         <div style={{ height: "100%" }}>
             <Head>
-                <title>{note.name}</title>
-                <meta name="description" content={note.body?.substring(0, 50)} />
+                <title>{note.name.substring(0, 50)} | Kurumi</title>
+                <meta name="description" content={note.body?.substring(0, 150) ?? "Note has no body"} />
             </Head>
             <Nav title={<NoteTitle note={note} />} />
             {errored ? <ErrorBox text={"Error occured fetching note"} /> : <Editor content={note.body} />}
