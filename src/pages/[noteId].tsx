@@ -4,7 +4,7 @@ import dbConnect from "../database/connect";
 import Note, { INote } from "../database/models/Note";
 import Nav from "../components/navbar";
 import ErrorBox from "../components/errorBox";
-import NoteTitle from "../components/NoteTitel";
+import NoteTitle from "../components/NoteTitle";
 
 interface NoteProps {
     note: INote;
