@@ -63,7 +63,7 @@ const Editor: FC<IEditor> = ({ content }) => {
     return (
         <MonacoEditor
             theme={colorMode === "dark" ? "vs-dark" : "light"}
-            height={"100%"}
+            height={"calc(100% -  var(--chakra-sizes-16))"}
             value={text}
             onChange={handleChange}
             onMount={handleMount}
