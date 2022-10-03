@@ -21,8 +21,8 @@ export const SocketContext = React.createContext<ISocketContext>({ socket });
  * @returns
  */
 const SocketInterface: React.FC<{ children: any }> = ({ children }) => {
-    const toast = useToast();
     const { socket, connected } = useWebsocket();
+    const toast = useToast();
 
     useEffect(() => {
         socket.connect();
