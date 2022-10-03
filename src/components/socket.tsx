@@ -7,7 +7,12 @@ export interface ISocketContext {
     socket: Socket;
 }
 
-const socket = io({ reconnection: true, reconnectionDelay: 2000 });
+const socket = io({
+    reconnection: true,
+    reconnectionDelay: 2000,
+    transports: ["websocket", "polling"],
+    rememberUpgrade: true,
+});
 
 export const SocketContext = React.createContext<ISocketContext>({ socket });
 
