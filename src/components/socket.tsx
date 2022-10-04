@@ -10,8 +10,8 @@ export interface ISocketContext {
 const socket = io({
     reconnection: true,
     reconnectionDelay: 2000,
-    transports: ["websocket", "polling"],
-    rememberUpgrade: true,
+    //transports: ["websocket", "polling"],
+    //rememberUpgrade: true,
 });
 
 export const SocketContext = React.createContext<ISocketContext>({ socket });
