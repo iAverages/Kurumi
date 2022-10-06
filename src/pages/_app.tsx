@@ -1,24 +1,16 @@
+// src/pages/_app.tsx
 import "../styles/globals.css";
-import type { AppProps } from "next/app";
-import React, { useEffect } from "react";
-import { SocketManager } from "../components/socket";
-import { ChakraProvider } from "@chakra-ui/react";
+import { SessionProvider } from "next-auth/react";
+import type { Session } from "next-auth";
+import type { AppType } from "next/app";
+import { trpc } from "../utils/trpc";
 
-function MyApp({ Component, pageProps }: AppProps) {
-    useEffect(() => {
-        // Starts websocket server
-        // Is there a better way to do this?
-        // I dont like it lol
-        fetch("/api/socket");
-    }, []);
-
+const MyApp: AppType<{ session: Session | null }> = ({ Component, pageProps: { session, ...pageProps } }) => {
     return (
-        <SocketManager>
-            <ChakraProvider>
-                <Component {...pageProps} />
-            </ChakraProvider>
-        </SocketManager>
+        <SessionProvider session={session}>
+            <Component {...pageProps} />
+        </SessionProvider>
     );
-}
+};
 
-export default MyApp;
+export default trpc.withTRPC(MyApp);
