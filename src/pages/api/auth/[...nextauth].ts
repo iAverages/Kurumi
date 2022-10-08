@@ -1,5 +1,6 @@
 import NextAuth, { type NextAuthOptions } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
+import EmailProvider from "next-auth/providers/email";
 
 // Prisma adapter for NextAuth, optional and can be removed
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
@@ -23,7 +24,18 @@ export const authOptions: NextAuthOptions = {
             clientId: env.DISCORD_CLIENT_ID,
             clientSecret: env.DISCORD_CLIENT_SECRET,
         }),
-        // ...add more providers here
+        EmailProvider({
+            server: {
+                host: env.EMAIL_SERVER_HOST,
+                port: env.EMAIL_SERVER_PORT,
+                secure: env.EMAIL_SERVER_SECURE,
+                auth: {
+                    user: env.EMAIL_SERVER_USER,
+                    pass: env.EMAIL_SERVER_PASSWORD,
+                },
+            },
+            from: env.EMAIL_FROM,
+        }),
     ],
 };
 
