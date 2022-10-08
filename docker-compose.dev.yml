@@ -1,0 +1,24 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql:/var/lib/mysql
+    restart: unless-stopped
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mysql:3306
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    restart: unless-stopped
+
+volumes:
+  mysql:
+    driver: local
