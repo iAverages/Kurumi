@@ -143,7 +143,7 @@ export async function getServerSideProps() {
               $or: [{ archived: { $exists: false } }, { archived: false }],
           })
         : [];
-    return { props: { errored: !connected, _notes: JSON.parse(JSON.stringify(notes)) } };
+    return { props: { errored: !connected, _notes: JSON.parse(JSON.stringify(notes.reverse())) } };
 }
 
 export default Home;
