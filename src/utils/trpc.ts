@@ -9,7 +9,7 @@ import getConfig from "next/config";
 import { env } from "../env/client.mjs";
 
 const { publicRuntimeConfig } = getConfig();
-const { APP_URL, WS_URL } = publicRuntimeConfig;
+const { APP_URL } = publicRuntimeConfig;
 
 function getEndingLink(ctx: NextPageContext | undefined) {
     if (typeof window === "undefined") {
