@@ -4,6 +4,10 @@ import * as trpcNext from "@trpc/server/adapters/next";
 import { Session } from "next-auth";
 import { getServerAuthSession } from "../common/get-server-auth-session";
 import { prisma } from "../db/client";
+import { NodeHTTPCreateContextFnOptions } from "@trpc/server/adapters/node-http";
+import { IncomingMessage } from "http";
+import ws from "ws";
+import { getSession } from "next-auth/react";
 
 type CreateContextOptions = {
     session: Session | null;
@@ -24,11 +28,15 @@ export const createContextInner = async (opts: CreateContextOptions) => {
  * This is the actual context you'll use in your router
  * @link https://trpc.io/docs/context
  **/
-export const createContext = async (opts: trpcNext.CreateNextContextOptions) => {
+export const createContext = async (
+    opts: trpcNext.CreateNextContextOptions | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>
+) => {
     const { req, res } = opts;
 
     // Get the session from the server using the unstable_getServerSession wrapper function
-    const session = await getServerAuthSession({ req, res });
+    const session = await getSession(opts);
+
+    // const session = await getServerAuthSession({ req, res });
 
     return await createContextInner({
         session,

@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "module": "commonjs",
+        "outDir": "dist",
+        "target": "ESNext",
+        "lib": ["ESNext", "DOM"],
+        "isolatedModules": false,
+        "noEmit": false
+    },
+    "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx"]
+}
