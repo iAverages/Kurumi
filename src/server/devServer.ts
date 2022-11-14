@@ -5,6 +5,7 @@ import fetch from "node-fetch";
 import ws from "ws";
 
 if (!global.fetch) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global as any).fetch = fetch;
 }
 

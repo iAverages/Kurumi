@@ -1,4 +1,5 @@
 // @ts-check
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { env } from "./src/env/server.mjs";
 
 /**
