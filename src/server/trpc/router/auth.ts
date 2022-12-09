@@ -12,16 +12,29 @@ export const authRouter = t.router({
     getSecretMessage: authedProcedure.query(() => {
         return "You are logged in and can see this secret message!";
     }),
-    test: authedProcedure.subscription(() => {
-        return observable<{ test: string }>((emit) => {
-            const onAdd = (data: { test: string }) => emit.next(data);
+    test: t.procedure.subscription(() => {
+        return observable<string>((emit) => {
+            const onAdd = (data: string) => emit.next(data);
             ee.on("add", onAdd);
             return () => {
                 ee.off("add", onAdd);
             };
         });
     }),
-    test2: authedProcedure.input(z.object({ test: z.string() })).mutation(({ input }) => {
-        ee.emit("add", input);
-    }),
+    updateNoteText: t.procedure
+        .input(
+            z.object({
+                content: z.string(),
+                id: z.string(),
+            })
+        )
+        .mutation(({ input, ctx }) => {
+            ee.emit("add", input.content);
+            // return ctx.prisma.notes.update({
+            //     data: {
+            //         content: input.content,
+            //     },
+            //     where: { id: input.id },
+            // });
+        }),
 });
