@@ -1,7 +1,7 @@
 import Head from "next/head";
 import { useState } from "react";
+import Editor from "../components/editor";
 import { trpc } from "../utils/trpc";
-import Editor from "@monaco-editor/react";
 
 const Note = () => {
     const [data, setData] = useState("");
@@ -33,16 +33,13 @@ const Note = () => {
                 <div className="h-screen">
                     <p>Data: {data}</p>
                     <Editor
-                        height={"calc(100% -  var(--chakra-sizes-16))"}
-                        language="typescript"
-                        theme="vs-dark"
-                        value={data}
-                        onChange={(e) => {
-                            mutate.mutateAsync({
-                                content: e ?? "",
-                                id: noteId,
-                            });
-                        }}
+
+                    // onChange={(e) => {
+                    //     mutate.mutateAsync({
+                    //         content: e ?? "",
+                    //         id: noteId,
+                    //     });
+                    // }}
                     />
                 </div>
             </main>
