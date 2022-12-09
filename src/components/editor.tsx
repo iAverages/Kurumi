@@ -1,8 +1,11 @@
+import { ExcalidrawAPIRefValue } from "@excalidraw/excalidraw/types/types";
 import Monaco from "@monaco-editor/react";
+import { useState, useEffect, ForwardRefExoticComponent, MemoExoticComponent, RefAttributes } from "react";
 
-import { useState, useEffect } from "react";
+type Excalidraw = MemoExoticComponent<ForwardRefExoticComponent<RefAttributes<ExcalidrawAPIRefValue>>>;
+
 const Excalidraw = () => {
-    const [Comp, setComp] = useState(null);
+    const [Comp, setComp] = useState<Excalidraw>();
     useEffect(() => {
         import("@excalidraw/excalidraw").then((comp) => {
             setComp(comp.Excalidraw);
