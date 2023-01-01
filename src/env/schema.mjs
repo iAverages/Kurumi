@@ -7,7 +7,7 @@ import { z } from "zod";
  */
 export const serverSchema = z.object({
     DATABASE_URL: z.string().url(),
-    NODE_ENV: z.enum(["development", "test", "production"]),
+    NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     NEXTAUTH_SECRET: z.string(),
     NEXTAUTH_URL: z.preprocess(
         // This makes Vercel deployments not fail if you don't set NEXTAUTH_URL
@@ -34,6 +34,7 @@ export const serverSchema = z.object({
 export const clientSchema = z.object({
     // NEXT_PUBLIC_BAR: z.string(),
     NEXT_PUBLIC_WS_URL: z.string().url(),
+    NEXT_PUBLIC_COMMIT_HASH: z.string().optional(),
 });
 
 /**
@@ -44,4 +45,5 @@ export const clientSchema = z.object({
  */
 export const clientEnv = {
     NEXT_PUBLIC_WS_URL: process.env.NEXT_PUBLIC_WS_URL,
+    NEXT_PUBLIC_COMMIT_HASH: process.env.NEXT_PUBLIC_COMMIT_HASH,
 };
