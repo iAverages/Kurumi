@@ -3,16 +3,14 @@ import React, { ReactNode, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { useWebsocket } from "../hooks/useWebsocket";
 import { ClientToServerEvents, ServerToClientEvents } from "../types/websocket.events";
+import { env } from "../env/client.mjs";
 
-const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
-    process.env.NEXT_PUBLIC_WEBSOCKET_HOST ?? "ws://localhost:3001",
-    {
-        reconnection: true,
-        reconnectionDelay: 2000,
-        transports: ["websocket", "polling"],
-        rememberUpgrade: true,
-    }
-);
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(env.NEXT_PUBLIC_WS_URL, {
+    reconnection: true,
+    reconnectionDelay: 2000,
+    transports: ["websocket", "polling"],
+    rememberUpgrade: true,
+});
 
 export const SocketContext = React.createContext<{
     socket: Socket<ServerToClientEvents, ClientToServerEvents>;
