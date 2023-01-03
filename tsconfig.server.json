@@ -3,10 +3,10 @@
     "compilerOptions": {
         "module": "commonjs",
         "outDir": "dist",
-        "target": "ESNext",
-        "lib": ["ESNext", "DOM"],
+        "target": "es2019",
+        "lib": ["es2019"],
         "isolatedModules": false,
         "noEmit": false
     },
-    "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx"]
+    "include": ["src/server/server.ts"]
 }

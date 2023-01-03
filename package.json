@@ -3,10 +3,10 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
-        "build": "next build",
+        "build": "next build && tsc --project tsconfig.server.json",
         "postinstall": "prisma generate",
         "lint": "next lint",
-        "start": "next start",
+        "start": "cross-env NODE_ENV=production node dist/server/server.js",
         "format": "prettier --write .",
         "dev:wss": "cross-env PORT=3001 tsx watch src/server/server.dev.ts --tsconfig tsconfig.server.json ",
         "dev:next": "next dev",
