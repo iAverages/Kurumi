@@ -27,19 +27,11 @@ const Editor: React.FC<EditorProps> = ({ data, showExcalidraw }) => {
     };
 
     const handleExcalidrawChange = (elements: readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
-        console.log("elements", elements);
-        console.log("appState", appState);
-        console.log("files", files);
-
         // Saving collaborators to db is not needed, it breaks excalidraw
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { collaborators, ...restAppState } = appState;
         socket.emit("drawUpdate", { noteId: data.id, value: JSON.stringify({ elements, appState: restAppState, files }) });
     };
-
-    useEffect(() => {
-        console.log("excaliData", excaliData);
-    }, [excaliData]);
 
     return (
         <>
