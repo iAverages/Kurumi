@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { t, authedProcedure } from "../trpc";
-//
+
 export const notesRouter = t.router({
     getNote: authedProcedure
         .input(
