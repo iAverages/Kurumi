@@ -27,7 +27,7 @@ import {
     Text,
 } from "@chakra-ui/react";
 import { env } from "../env/client.mjs";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 interface IndexProps {
     title: string | ReactNode;
@@ -89,7 +89,7 @@ const Nav: FC<IndexProps> = ({ title, icons }) => {
                                 <MenuDivider />
                                 <Text marginLeft={2}>Commit: {env.NEXT_PUBLIC_COMMIT_HASH ?? "Dev"}</Text>
                                 <MenuDivider />
-                                <MenuItem>Logout</MenuItem>
+                                <MenuItem onClick={() => signOut({ callbackUrl: "/login" })}>Logout</MenuItem>
                             </MenuList>
                         </Menu>
                     </Stack>
