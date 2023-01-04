@@ -1,15 +1,24 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  mongo:
-    image: mongo
-    restart: unless-stopped
-    volumes:
-      - mongodb:/data/db
+  mysql:
+    image: mariadb:latest
+    ports:
+      - 3306:3306
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - mysql:/var/lib/mysql
+    restart: unless-stopped
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: mysql:3306
+      PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    restart: unless-stopped
 
 volumes:
-  mongodb:
+  mysql:
     driver: local

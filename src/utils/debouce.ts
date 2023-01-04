@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 /**
  * Debouce function with "timeout" functionality
  * If the function does not run after timeout ms

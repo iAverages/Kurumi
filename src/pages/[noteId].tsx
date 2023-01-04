@@ -1,48 +1,43 @@
-import Head from "next/head";
+import { useRouter } from "next/router";
 import Editor from "../components/editor";
-import dbConnect from "../database/connect";
-import Note, { INote } from "../database/models/Note";
 import Nav from "../components/navbar";
-import ErrorBox from "../components/errorBox";
-import NoteTitle from "../components/NoteTitle";
-import { Box } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import useBoolean from "../hooks/useBoolean";
+import { trpc } from "../utils/trpc";
 
-interface NoteProps {
-    note: INote;
-    errored: boolean;
-}
-
-const NotePage = ({ note, errored }: NoteProps) => {
-    const [title, setTitle] = useState(note.name);
-
-    useEffect(() => setTitle(note.name?.substring(0, 50) + " | Kurumi"), [note, note.name]);
+const Note = () => {
+    const router = useRouter();
+    const { value: usingExcalidraw, on: enableExcalidraw, off: disableExcalidraw } = useBoolean();
+    const { noteId } = router.query;
+    const { data } = trpc.notes.getNote.useQuery(
+        { id: noteId as string },
+        {
+            enabled: !!noteId,
+            refetchOnWindowFocus: false,
+            refetchInterval: false,
+            refetchOnMount: true,
+            refetchOnReconnect: false,
+        }
+    );
 
     return (
-        <div style={{ height: "100%" }}>
-            <Head>
-                <title>{title}</title>
-                <meta name="description" content={note.body?.substring(0, 150) ?? "Note has no body"} />
-            </Head>
-            <Box h={"100%"}>
-                <Nav title={<NoteTitle note={note} />} />
-                {errored ? <ErrorBox text={"Error occured fetching note"} /> : <Editor content={note.body} />}
-            </Box>
-        </div>
+        <>
+            <Nav
+                title={data?.title || "Untitled"}
+                icons={
+                    <>
+                        <button onClick={enableExcalidraw}>Excalidraw</button>
+                        <button onClick={disableExcalidraw}>Markdown</button>
+                    </>
+                }
+            />
+            <main className=" flex min-h-screen flex-col bg-black ">
+                <div className="h-screen">
+                    {data && <Editor data={data} showExcalidraw={usingExcalidraw} />}
+                    {!data && <div className="text-white">Loading...</div>}
+                </div>
+            </main>
+        </>
     );
 };
 
-export async function getServerSideProps({ params }: any) {
-    const connected = await dbConnect();
-    let note: object = {};
-    if (connected) {
-        try {
-            note = (await Note.findById(params.noteId)) ?? {};
-        } catch (e) {
-            // No note found
-        }
-    }
-    return { props: { errored: !connected, note: JSON.parse(JSON.stringify(note)) } };
-}
-
-export default NotePage;
+export default Note;

@@ -1,73 +1,43 @@
-/**
- * NOTE: This will be reworked to use CRDT (YJS) and actually
- * support multiple clients at the same time
- * Since only I will be used this for now I will do it like this
- * as there is some issues I need to work out with using monaco
- * with nextjs and yjs/y-monaco
- */
-import { useColorMode } from "@chakra-ui/react";
-import MonacoEditor, { Monaco } from "@monaco-editor/react";
-import * as monaco from "monaco-editor";
-import { useRouter } from "next/router";
-import { FC, useEffect, useState } from "react";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
+import { AppState, BinaryFiles } from "@excalidraw/excalidraw/types/types";
+import { Notes, User } from "@prisma/client";
+import { useEffect, useState } from "react";
 import { useWebsocket } from "../hooks/useWebsocket";
-import { SocketEvents, TextChanged } from "../socketEvents";
-export type MonacoEditor = monaco.editor.IStandaloneCodeEditor;
+import Excalidraw from "./excalidraw";
+import Monaco from "./monaco";
 
-interface IEditor {
-    content: string;
-}
+type EditorProps = {
+    data: Notes & {
+        user: User;
+    };
+    showExcalidraw: boolean;
+};
 
-const Editor: FC<IEditor> = ({ content }) => {
-    const router = useRouter();
+const Editor: React.FC<EditorProps> = ({ data, showExcalidraw }) => {
     const { socket } = useWebsocket();
-    const { colorMode } = useColorMode();
-    const { noteId } = router.query;
-    const [editor, setEditor] = useState<MonacoEditor>();
-    const [text, setText] = useState<string>("");
+    const [excaliData, setExcaliData] = useState(data.excalidraw !== "" ? JSON.parse(data.excalidraw) : {});
 
-    const handleMount = (_editor: MonacoEditor) => setEditor(_editor);
+    useEffect(() => {
+        setExcaliData(data.excalidraw !== "" ? JSON.parse(data.excalidraw) : {});
+    }, [data]);
 
-    const handleChange = (newText: string | undefined) => {
-        setText(newText ?? "");
-        socket.emit(SocketEvents.TextUpdate, { noteId, text: newText });
-        console.log("Emitted change to websocket -", noteId);
+    const handleMonacoChange = (value: string | undefined) => {
+        if (!value) return;
+        socket.emit("textUpdate", { noteId: data.id, text: value });
     };
 
-    useEffect(() => {
-        socket.emit(SocketEvents.UpdateNoteId, noteId);
-        return () => {
-            socket.emit(SocketEvents.LeaveNote);
-        };
-    }, [noteId, socket]);
-
-    useEffect(() => {
-        if (!editor) return;
-
-        const hanleTextChange = (a: TextChanged) => {
-            console.log(`Note updated from ${a.fromId}`);
-            setText(a.text);
-        };
-
-        socket.on(SocketEvents.TextChanged, hanleTextChange);
-
-        return () => {
-            socket.off(SocketEvents.TextChanged, hanleTextChange);
-        };
-    }, [editor, socket]);
-
-    useEffect(() => {
-        setText(content);
-    }, [content]);
+    const handleExcalidrawChange = (elements: readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
+        // Saving collaborators to db is not needed, it breaks excalidraw
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { collaborators, ...restAppState } = appState;
+        socket.emit("drawUpdate", { noteId: data.id, value: JSON.stringify({ elements, appState: restAppState, files }) });
+    };
 
     return (
-        <MonacoEditor
-            theme={colorMode === "dark" ? "vs-dark" : "light"}
-            height={"calc(100% -  var(--chakra-sizes-16))"}
-            value={text}
-            onChange={handleChange}
-            onMount={handleMount}
-        />
+        <>
+            {!showExcalidraw && <Monaco value={data.content} onChange={handleMonacoChange} />}
+            {showExcalidraw && <Excalidraw initialData={excaliData} onChange={handleExcalidrawChange} />}
+        </>
     );
 };
 
