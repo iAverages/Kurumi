@@ -56,4 +56,19 @@ export const notesRouter = t.router({
                 nextCursor,
             };
         }),
+    createNote: authedProcedure.mutation(async ({ ctx }) => {
+        const note = await ctx.prisma.notes.create({
+            data: {
+                content: "",
+                excalidraw: "{}",
+                title: "Untitled",
+                user: {
+                    connect: {
+                        id: ctx.session.user.id,
+                    },
+                },
+            },
+        });
+        return note;
+    }),
 });

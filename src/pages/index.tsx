@@ -9,12 +9,15 @@ import NoteBox from "../components/noteBox";
 
 const Home: NextPage = () => {
     const { data, error: errored } = trpc.notes.getNotes.useQuery({ orderBy: "desc", limit: 10 }, {});
+    const createNote = trpc.notes.createNote.useMutation();
+    const toast = useToast();
 
     const handleCreateNote = async () => {
-        const response = await fetch("/api/note", {
-            method: "POST",
-        }).then((res) => res.json());
-        Router.push(response._id);
+        const note = await createNote.mutateAsync();
+        Router.push(note.id);
+        toast({
+            title: "Note created",
+        });
     };
 
     return (
