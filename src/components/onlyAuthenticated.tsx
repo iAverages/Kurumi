@@ -11,7 +11,7 @@ const isPublicRoute = (currentRoute: string) => {
     return false;
 };
 
-const Auth: React.FC<{ children: ReactNode }> = ({ children }) => {
+const OnlyAuthenticated: React.FC<{ children: ReactNode }> = ({ children }) => {
     const session = useSession();
     const router = useRouter();
 
@@ -25,4 +25,4 @@ const Auth: React.FC<{ children: ReactNode }> = ({ children }) => {
     return <>{children}</>;
 };
 
-export default Auth;
+export default OnlyAuthenticated;
