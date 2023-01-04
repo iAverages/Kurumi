@@ -8,8 +8,8 @@ import { env } from "../env/client.mjs";
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(env.NEXT_PUBLIC_WS_URL, {
     reconnection: true,
     reconnectionDelay: 2000,
-    //transports: ["websocket", "polling"],
-    //rememberUpgrade: true,
+    transports: ["websocket", "polling"],
+    rememberUpgrade: true,
 });
 
 export const SocketContext = React.createContext<{
