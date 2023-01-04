@@ -20,9 +20,7 @@ app.prepare().then(() => {
         .on("request", async (req, res) => {
             try {
                 const parsedUrl = parse(req.url ?? "", true);
-                // if (!parsedUrl.pathname?.startsWith("/socket.io")) {
                 await handle(req, res, parsedUrl);
-                // }
             } catch (err) {
                 console.error("Error occurred handling", req.url, err);
                 res.statusCode = 500;
