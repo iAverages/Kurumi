@@ -4,6 +4,7 @@ import { DeleteIcon } from "@chakra-ui/icons";
 import { Button, useToast } from "@chakra-ui/react";
 import { Notes, User } from "@prisma/client";
 import { useRouter } from "next/router";
+import { trpc } from "../utils/trpc";
 
 const NoteBox: FC<{
     note: Notes & {
@@ -14,6 +15,21 @@ const NoteBox: FC<{
     const router = useRouter();
 
     const handleClick = () => router.push(`/${note.id}`);
+    const trpcContext = trpc.useContext();
+    const { mutate: removeNote } = trpc.notes.deleteNote.useMutation({
+        onSuccess: (_, input) => {
+            // Optimistic update
+            // In the future the input will be passed in to the component
+            trpcContext.notes.getNotes.setData({ orderBy: "desc", limit: 10 }, (data) => {
+                if (!data) return data;
+                return {
+                    ...data,
+                    items: data.items.filter((item) => item.id !== input),
+                };
+            });
+            toast({ title: "Note deleted" });
+        },
+    });
 
     return (
         <Center py={6}>
@@ -40,11 +56,7 @@ const NoteBox: FC<{
                             Private
                         </Text>
                         <Spacer />
-                        <Button
-                            alignSelf={"self-end"}
-                            _hover={{ bg: "red.300" }}
-                            //onClick={handleDelete}>
-                        >
+                        <Button alignSelf={"self-end"} _hover={{ bg: "red.300" }} onClick={() => removeNote(note.id)}>
                             {<DeleteIcon />}
                         </Button>
                     </Flex>

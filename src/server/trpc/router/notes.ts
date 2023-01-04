@@ -37,6 +37,9 @@ export const notesRouter = t.router({
                             equals: ctx.session.user.id,
                         },
                     },
+                    deletedAt: {
+                        equals: null,
+                    },
                 },
                 cursor: cursor ? { id: cursor } : undefined,
                 orderBy: {
@@ -70,5 +73,15 @@ export const notesRouter = t.router({
             },
         });
         return note;
+    }),
+    deleteNote: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
+        await ctx.prisma.notes.update({
+            where: {
+                id: input,
+            },
+            data: {
+                deletedAt: new Date(),
+            },
+        });
     }),
 });
