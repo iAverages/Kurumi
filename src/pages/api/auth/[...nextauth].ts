@@ -18,6 +18,11 @@ export const authOptions: NextAuthOptions = {
             return session;
         },
     },
+    pages: {
+        signIn: "/login",
+        error: "/error",
+        signOut: "/login",
+    },
     // Configure one or more authentication providers
     adapter: PrismaAdapter(prisma),
     providers: [
