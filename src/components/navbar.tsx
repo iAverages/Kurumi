@@ -42,12 +42,16 @@ const Nav: FC<IndexProps> = ({ title, icons }) => {
     return (
         <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
             <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-                <Link href={"/"}>
-                    <Button>{<ArrowBackIcon />}</Button>
-                </Link>
-                <Box>{title}</Box>
+                <Box w={"33%"}>
+                    <Link href={"/"}>
+                        <Button>{<ArrowBackIcon />}</Button>
+                    </Link>
+                </Box>
+                <Flex w={"33%"} justifyContent={"center"}>
+                    {title}
+                </Flex>
 
-                <Flex alignItems={"center"}>
+                <Flex alignItems={"center"} w={"33%"} flexDirection={"row-reverse"}>
                     <Stack direction={"row"} spacing={7}>
                         {icons}
                         <Popover>
