@@ -8,7 +8,6 @@ import {
     Heading,
     Input,
     Stack,
-    Text,
     useBreakpointValue,
     useColorModeValue,
 } from "@chakra-ui/react";

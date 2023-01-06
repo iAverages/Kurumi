@@ -9,7 +9,7 @@ const Note = () => {
     const { value: usingExcalidraw, on: enableExcalidraw, off: disableExcalidraw } = useBoolean();
     const { noteId } = router.query;
     const { data } = trpc.notes.getNote.useQuery(
-        { id: noteId as string },
+        { noteId: noteId as string },
         {
             enabled: !!noteId,
             refetchOnWindowFocus: false,

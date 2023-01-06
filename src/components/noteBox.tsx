@@ -24,7 +24,7 @@ const NoteBox: FC<{
                 if (!data) return data;
                 return {
                     ...data,
-                    items: data.items.filter((item) => item.id !== input),
+                    items: data.items.filter((item) => item.id !== input.noteId),
                 };
             });
             toast({ title: "Note deleted" });
@@ -56,7 +56,11 @@ const NoteBox: FC<{
                             Private
                         </Text>
                         <Spacer />
-                        <Button alignSelf={"self-end"} _hover={{ bg: "red.300" }} onClick={() => removeNote(note.id)}>
+                        <Button
+                            alignSelf={"self-end"}
+                            _hover={{ bg: "red.300" }}
+                            onClick={() => removeNote({ noteId: note.id })}
+                        >
                             {<DeleteIcon />}
                         </Button>
                     </Flex>

@@ -1,23 +1,17 @@
 import { z } from "zod";
-import { t, authedProcedure } from "../trpc";
+import { t, authedProcedure, userNoteProcedure } from "../trpc";
 //
 export const notesRouter = t.router({
-    getNote: authedProcedure
-        .input(
-            z.object({
-                id: z.string(),
-            })
-        )
-        .query(async ({ input, ctx }) => {
-            return ctx.prisma.notes.findUnique({
-                where: {
-                    id: input.id,
-                },
-                include: {
-                    user: true,
-                },
-            });
-        }),
+    getNote: userNoteProcedure.query(async ({ input, ctx }) => {
+        return ctx.prisma.notes.findUnique({
+            where: {
+                id: input.noteId,
+            },
+            include: {
+                user: true,
+            },
+        });
+    }),
     getNotes: authedProcedure
         .input(
             z.object({
@@ -74,10 +68,10 @@ export const notesRouter = t.router({
         });
         return note;
     }),
-    deleteNote: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
+    deleteNote: userNoteProcedure.mutation(async ({ input, ctx }) => {
         await ctx.prisma.notes.update({
             where: {
-                id: input,
+                id: input.noteId,
             },
             data: {
                 deletedAt: new Date(),
