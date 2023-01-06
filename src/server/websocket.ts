@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import { ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData } from "../types/websocket.events";
 import { debounce } from "../utils/debouce";
 import { prisma } from "./db/client";
+import { parse } from "cookie";
 
 type WebsocketServer = Server<ClientToServerEvents, ServerToClientEvents, InterServerEvents, SocketData>;
 const noteSaveDebouceMap = new Map<string, (id: string, noteChanges: Partial<Notes>) => void>();
@@ -22,6 +23,22 @@ const debouceSaveInit = () =>
     );
 
 export const initWebsocketServer = (server: WebsocketServer) => {
+    server.use(async (socket, next) => {
+        const cookies = parse(socket.handshake.headers.cookie ?? "");
+        if (cookies["next-auth.session-token"] === undefined) {
+            return next(new Error("Authentication error"));
+        }
+        const session = await prisma.session.findUnique({
+            where: {
+                sessionToken: cookies["next-auth.session-token"],
+            },
+        });
+        if (!session) {
+            return next(new Error("Authentication error"));
+        }
+        next();
+    });
+
     server.on("connection", (socket) => {
         console.log("Connected", socket.id);
 

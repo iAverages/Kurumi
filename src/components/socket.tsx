@@ -4,12 +4,15 @@ import { io, Socket } from "socket.io-client";
 import { useWebsocket } from "../hooks/useWebsocket";
 import { ClientToServerEvents, ServerToClientEvents } from "../types/websocket.events";
 import { env } from "../env/client.mjs";
+// import { getSession } from "next-auth/react";
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(env.NEXT_PUBLIC_WS_URL, {
     reconnection: true,
     reconnectionDelay: 2000,
     transports: ["websocket", "polling"],
     rememberUpgrade: true,
+    autoConnect: false,
+    withCredentials: true,
 });
 
 export const SocketContext = React.createContext<{

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { t, authedProcedure, userNoteProcedure } from "../trpc";
-//
+
 export const notesRouter = t.router({
     getNote: userNoteProcedure.query(async ({ input, ctx }) => {
         return ctx.prisma.notes.findUnique({
