@@ -1,3 +1,4 @@
+import { Spinner } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { type ReactNode, useEffect } from "react";
@@ -21,6 +22,9 @@ const OnlyAuthenticated: React.FC<{ children: ReactNode }> = ({ children }) => {
             signIn();
         }
     }, [session.status, router]);
+
+    if ((session.status === "unauthenticated" || session.status === "loading") && !isPublicRoute(router.pathname))
+        return <Spinner />;
 
     return <>{children}</>;
 };
