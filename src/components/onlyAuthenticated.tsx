@@ -17,14 +17,19 @@ const OnlyAuthenticated: React.FC<{ children: ReactNode }> = ({ children }) => {
     const router = useRouter();
 
     useEffect(() => {
-        if (!router.isReady || isPublicRoute(router.pathname)) return;
+        if (!router.isReady) return;
         if (session.status === "unauthenticated") {
             signIn();
+        }
+        if (session.status === "authenticated" && router.pathname === "/login") {
+            router.push("/");
         }
     }, [session.status, router]);
 
     if ((session.status === "unauthenticated" || session.status === "loading") && !isPublicRoute(router.pathname))
         return <Spinner />;
+
+    if (session.status === "authenticated" && router.pathname === "/login") return <Spinner />;
 
     return <>{children}</>;
 };
