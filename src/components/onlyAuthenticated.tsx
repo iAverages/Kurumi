@@ -2,6 +2,7 @@ import { Spinner } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { type ReactNode, useEffect } from "react";
+import PageSpinner from "./PageSpinner";
 
 const publicRoutes = ["/login", "/error"] as const;
 
@@ -27,9 +28,11 @@ const OnlyAuthenticated: React.FC<{ children: ReactNode }> = ({ children }) => {
     }, [session.status, router]);
 
     if ((session.status === "unauthenticated" || session.status === "loading") && !isPublicRoute(router.pathname))
-        return <Spinner />;
+        return <PageSpinner />;
 
-    if (session.status === "authenticated" && router.pathname === "/login") return <Spinner />;
+    if (session.status === "authenticated" && router.pathname === "/login") return <PageSpinner />;
+
+    if (session.status === "loading") return <PageSpinner />;
 
     return <>{children}</>;
 };
