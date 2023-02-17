@@ -20,5 +20,7 @@ export const debounce = (func: (...args: any[]) => any, wait: number, timeout: n
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(later, wait);
         if (bouceTimeout === null) bouceTimeout = setTimeout(later, timeout);
+
+        return later;
     };
 };

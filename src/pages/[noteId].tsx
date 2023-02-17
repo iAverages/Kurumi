@@ -1,11 +1,14 @@
 import { useRouter } from "next/router";
+import { useEffect } from "react";
 import Editor from "../components/editor";
 import Nav from "../components/navbar";
 import useBoolean from "../hooks/useBoolean";
+import { useWebsocket } from "../hooks/useWebsocket";
 import { trpc } from "../utils/trpc";
 
 const Note = () => {
     const router = useRouter();
+    const { socket } = useWebsocket();
     const { value: usingExcalidraw, on: enableExcalidraw, off: disableExcalidraw } = useBoolean();
     const { noteId } = router.query;
     const { data } = trpc.notes.getNote.useQuery(
@@ -18,6 +21,13 @@ const Note = () => {
             refetchOnReconnect: false,
         }
     );
+
+    useEffect(() => {
+        socket.emit("joinNote", { noteId: noteId as string });
+        return () => {
+            socket.emit("leaveNote", { noteId: noteId as string });
+        };
+    }, [socket, noteId]);
 
     return (
         <>
