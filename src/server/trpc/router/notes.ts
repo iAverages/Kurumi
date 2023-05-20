@@ -2,16 +2,6 @@ import { z } from "zod";
 import { t, authedProcedure, userNoteProcedure } from "../trpc";
 
 export const notesRouter = t.router({
-    getNote: userNoteProcedure.query(async ({ input, ctx }) => {
-        return ctx.prisma.notes.findUnique({
-            where: {
-                id: input.noteId,
-            },
-            include: {
-                user: true,
-            },
-        });
-    }),
     getNotes: authedProcedure
         .input(
             z.object({
@@ -37,7 +27,7 @@ export const notesRouter = t.router({
                 },
                 cursor: cursor ? { id: cursor } : undefined,
                 orderBy: {
-                    updatedAt: "asc",
+                    createdAt: "desc",
                 },
                 include: {
                     user: true,
@@ -53,6 +43,7 @@ export const notesRouter = t.router({
                 nextCursor,
             };
         }),
+
     createNote: authedProcedure.mutation(async ({ ctx }) => {
         const note = await ctx.prisma.notes.create({
             data: {
@@ -68,6 +59,7 @@ export const notesRouter = t.router({
         });
         return note;
     }),
+
     deleteNote: userNoteProcedure.mutation(async ({ input, ctx }) => {
         await ctx.prisma.notes.update({
             where: {
@@ -75,6 +67,17 @@ export const notesRouter = t.router({
             },
             data: {
                 deletedAt: new Date(),
+            },
+        });
+    }),
+
+    updateNoteTitle: userNoteProcedure.input(z.object({ title: z.string() })).mutation(async ({ input, ctx }) => {
+        await ctx.prisma.notes.update({
+            where: {
+                id: input.noteId,
+            },
+            data: {
+                title: input.title,
             },
         });
     }),

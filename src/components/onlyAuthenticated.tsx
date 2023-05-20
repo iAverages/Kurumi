@@ -14,25 +14,45 @@ const isPublicRoute = (currentRoute: string) => {
 };
 
 const OnlyAuthenticated: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const session = useSession();
+    const { status } = useSession();
     const router = useRouter();
 
     useEffect(() => {
-        if (!router.isReady) return;
-        if (session.status === "unauthenticated") {
+        if (status === "loading") return;
+
+        if (status === "unauthenticated" && router.pathname !== "/login") {
             signIn();
+            return;
         }
-        if (session.status === "authenticated" && router.pathname === "/login") {
+
+        if (status === "authenticated" && router.pathname.startsWith("/login")) {
             router.push("/");
         }
-    }, [session.status, router]);
+    }, [status, router]);
 
-    if ((session.status === "unauthenticated" || session.status === "loading") && !isPublicRoute(router.pathname))
-        return <PageSpinner />;
+    if (status === "authenticated") return <>{children}</>;
 
-    if (session.status === "authenticated" && router.pathname === "/login") return <PageSpinner />;
+    if (status === "unauthenticated" && router.pathname.startsWith("/login")) {
+        return <>{children}</>;
+    }
 
-    if (session.status === "loading") return <PageSpinner />;
+    return null;
+    //     if (!router.isReady) return;
+    //     if (session.status === "loading") return;
+    //     if (session.status === "unauthenticated") {
+    //         signIn();
+    //     }
+    //     if (session.status === "authenticated" && router.pathname === "/login") {
+    //         router.push("/");
+    //     }
+    // }, [session.status, router]);
+
+    // if ((session.status === "unauthenticated" || session.status === "loading") && !isPublicRoute(router.pathname))
+    //     return <PageSpinner />;
+
+    // if (session.status === "authenticated" && router.pathname === "/login") return <PageSpinner />;
+
+    // if (session.status === "loading") return <PageSpinner />;
 
     return <>{children}</>;
 };
