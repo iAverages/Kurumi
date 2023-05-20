@@ -20,11 +20,14 @@ const NoteBox: FC<{
         onSuccess: (_, input) => {
             // Optimistic update
             // In the future the input will be passed in to the component
-            trpcContext.notes.getNotes.setData({ orderBy: "desc", limit: 10 }, (data) => {
+            trpcContext.notes.getNotes.setInfiniteData({ orderBy: "desc", limit: 25 }, (data) => {
                 if (!data) return data;
                 return {
                     ...data,
-                    items: data.items.filter((item) => item.id !== input.noteId),
+                    pages: data.pages.map((page) => ({
+                        ...page,
+                        items: page.items.filter((item) => item.id !== input.noteId),
+                    })),
                 };
             });
             toast({ title: "Note deleted" });
