@@ -12,7 +12,7 @@ import {
     useColorModeValue,
 } from "@chakra-ui/react";
 import * as React from "react";
-import { OAuthButtonGroup } from "../components/oAuthButtonGroup";
+import { OAuthButtonGroup } from "~/components/oAuthButtonGroup";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
