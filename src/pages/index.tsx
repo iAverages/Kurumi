@@ -6,9 +6,20 @@ import Nav from "../components/navbar";
 import { Heading, Box, SimpleGrid } from "@chakra-ui/react";
 import { trpc } from "../utils/trpc";
 import NoteBox from "../components/noteBox";
+import { Show } from "../components/show";
 
 const Home: NextPage = () => {
-    const { data, error: errored } = trpc.notes.getNotes.useQuery({ orderBy: "desc", limit: 10 }, {});
+    const {
+        data,
+        error: errored,
+        fetchNextPage,
+        hasNextPage,
+    } = trpc.notes.getNotes.useInfiniteQuery(
+        { orderBy: "desc", limit: 10 },
+        {
+            getNextPageParam: (lastPage) => lastPage.nextCursor,
+        }
+    );
     const createNote = trpc.notes.createNote.useMutation();
     const toast = useToast();
 
@@ -40,10 +51,24 @@ const Home: NextPage = () => {
                             </Button>
                         </Box>
                         <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
-                            {data?.items?.map((note, idx) => (
-                                <NoteBox key={idx} note={note} />
-                            ))}
+                            <Show when={data}>
+                                {({ pages }) => (
+                                    <>
+                                        {pages.map(({ items }, page) => (
+                                            <>
+                                                {items.map((note, idx) => (
+                                                    <NoteBox key={`${page}-${idx}`} note={note} />
+                                                ))}
+                                            </>
+                                        ))}
+                                    </>
+                                )}
+                            </Show>
                         </SimpleGrid>
+
+                        <Button disabled={!hasNextPage} onClick={() => fetchNextPage()}>
+                            Load More Notes
+                        </Button>
                     </>
                 )}
             </Box>
