@@ -52,7 +52,7 @@ const Note = () => {
             socket.off("noteChanged");
             socket.emit("leaveNote", { noteId: noteId as string });
         };
-    }, [socket]);
+    }, [socket, noteId]);
 
     const handleMonacoChange = (value: string | undefined) => {
         if (!value) return;
