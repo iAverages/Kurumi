@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { FC } from "react";
 import Link from "next/link";
-import { useWebsocket } from "../hooks/useWebsocket";
+import { useWebsocket } from "~/hooks/useWebsocket";
 import { MoonIcon, SunIcon, ArrowBackIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import {
     Box,
@@ -26,7 +26,7 @@ import {
     PopoverBody,
     Text,
 } from "@chakra-ui/react";
-import { env } from "../env/client.mjs";
+import { env } from "~/env/client.mjs";
 import { signOut, useSession } from "next-auth/react";
 
 interface IndexProps {

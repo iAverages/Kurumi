@@ -11,7 +11,7 @@ export const notesRouter = t.router({
             })
         )
         .query(async ({ input, ctx }) => {
-            const limit = input.limit ?? 50;
+            const limit = Math.min(input.limit ?? 50, 50);
             const { cursor } = input;
             const items = await ctx.prisma.notes.findMany({
                 take: limit + 1, // get an extra item at the end which we'll use as next cursor
@@ -27,7 +27,7 @@ export const notesRouter = t.router({
                 },
                 cursor: cursor ? { id: cursor } : undefined,
                 orderBy: {
-                    createdAt: "desc",
+                    createdAt: input.orderBy,
                 },
                 include: {
                     user: true,

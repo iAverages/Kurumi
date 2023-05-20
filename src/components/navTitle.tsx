@@ -3,7 +3,7 @@ import { IconButton, ButtonGroup, Flex, useEditableControls } from "@chakra-ui/r
 
 import { EditablePreview, Editable, EditableInput, Input } from "@chakra-ui/react";
 import { Notes } from "@prisma/client";
-import { trpc } from "../utils/trpc";
+import { trpc } from "~/utils/trpc";
 
 const EditableControls = () => {
     const { isEditing, getSubmitButtonProps, getCancelButtonProps, getEditButtonProps } = useEditableControls();

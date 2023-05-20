@@ -1,5 +1,5 @@
 import { useState, useEffect, ForwardRefExoticComponent, MemoExoticComponent, RefAttributes } from "react";
-import { ExcalidrawAPIRefValue, ExcalidrawProps } from "@excalidraw/excalidraw/types/types";
+import type { ExcalidrawAPIRefValue, ExcalidrawProps } from "@excalidraw/excalidraw/types/types";
 
 type PublicExcalidrawProps = Omit<ExcalidrawProps, "forwardedRef">;
 

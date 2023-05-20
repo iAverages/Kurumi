@@ -1,10 +1,9 @@
 import { useToast } from "@chakra-ui/react";
 import React, { ReactNode, useEffect } from "react";
 import { io, Socket } from "socket.io-client";
-import { useWebsocket } from "../hooks/useWebsocket";
-import { ClientToServerEvents, ServerToClientEvents } from "../types/websocket.events";
-import { env } from "../env/client.mjs";
-// import { getSession } from "next-auth/react";
+import { useWebsocket } from "~/hooks/useWebsocket";
+import { ClientToServerEvents, ServerToClientEvents } from "~/types/websocket.events";
+import { env } from "~/env/client.mjs";
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(env.NEXT_PUBLIC_WS_URL, {
     reconnection: true,

@@ -2,15 +2,16 @@ import { useColorMode } from "@chakra-ui/react";
 import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
 import { AppState, BinaryFiles } from "@excalidraw/excalidraw/types/types";
 import { Notes } from "@prisma/client";
+import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import Excalidraw from "../components/excalidraw";
-import Monaco from "../components/monaco";
-import Nav from "../components/navbar";
-import NoteTitle from "../components/navTitle";
-import { Show } from "../components/show";
-import useBoolean from "../hooks/useBoolean";
-import { useWebsocket } from "../hooks/useWebsocket";
+import Excalidraw from "~/components/excalidraw";
+import Monaco from "~/components/monaco";
+import Nav from "~/components/navbar";
+import NoteTitle from "~/components/navTitle";
+import { Show } from "~/components/show";
+import useBoolean from "~/hooks/useBoolean";
+import { useWebsocket } from "~/hooks/useWebsocket";
 
 const Note = () => {
     const router = useRouter();
@@ -73,28 +74,38 @@ const Note = () => {
 
     return (
         <Show when={data}>
-            {(loadedData) => (
-                <div className={"h-screen w-screen"}>
-                    <Nav
-                        title={<NoteTitle note={loadedData} />}
-                        icons={
-                            <Show when={!usingExcalidraw} fallback={<button onClick={disableExcalidraw}>Markdown</button>}>
-                                <button onClick={enableExcalidraw}>Excalidraw</button>
-                            </Show>
-                        }
-                    />
-                    <Show
-                        when={!usingExcalidraw}
-                        fallback={
-                            <Excalidraw
-                                initialData={JSON.parse(loadedData.excalidraw ?? "{}")}
-                                onChange={handleExcalidrawChange}
-                            />
-                        }
-                    >
-                        <Monaco value={loadedData.content} onChange={handleMonacoChange} colorMode={colorMode} />
-                    </Show>
-                </div>
+            {(note) => (
+                <>
+                    <Head>
+                        <title>{note.title} | Kurumi Notes</title>
+                        <meta name="description" content="Simple note taking app" />
+                        <link rel="icon" href="/favicon.ico" />
+                    </Head>
+                    <div className={"h-screen w-screen"}>
+                        <Nav
+                            title={<NoteTitle note={note} />}
+                            icons={
+                                <Show
+                                    when={!usingExcalidraw}
+                                    fallback={<button onClick={disableExcalidraw}>Markdown</button>}
+                                >
+                                    <button onClick={enableExcalidraw}>Excalidraw</button>
+                                </Show>
+                            }
+                        />
+                        <Show
+                            when={!usingExcalidraw}
+                            fallback={
+                                <Excalidraw
+                                    initialData={JSON.parse(note.excalidraw ?? "{}")}
+                                    onChange={handleExcalidrawChange}
+                                />
+                            }
+                        >
+                            <Monaco value={note.content} onChange={handleMonacoChange} colorMode={colorMode} />
+                        </Show>
+                    </div>
+                </>
             )}
         </Show>
     );

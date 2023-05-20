@@ -4,7 +4,7 @@ import { DeleteIcon } from "@chakra-ui/icons";
 import { Button, useToast } from "@chakra-ui/react";
 import { Notes, User } from "@prisma/client";
 import { useRouter } from "next/router";
-import { trpc } from "../utils/trpc";
+import { trpc } from "~/utils/trpc";
 
 const NoteBox: FC<{
     note: Notes & {
@@ -13,24 +13,43 @@ const NoteBox: FC<{
 }> = ({ note }) => {
     const toast = useToast();
     const router = useRouter();
+    const trpcContext = trpc.useContext();
 
     const handleClick = () => router.push(`/${note.id}`);
-    const trpcContext = trpc.useContext();
+
     const { mutate: removeNote } = trpc.notes.deleteNote.useMutation({
-        onSuccess: (_, input) => {
-            // Optimistic update
-            // In the future the input will be passed in to the component
+        onMutate: async (input) => {
+            await trpcContext.notes.getNotes.cancel();
+            const old = trpcContext.notes.getNotes.getInfiniteData({ orderBy: "desc", limit: 25 }) ?? {
+                pages: [],
+                pageParams: [],
+            };
+
             trpcContext.notes.getNotes.setInfiniteData({ orderBy: "desc", limit: 25 }, (data) => {
                 if (!data) return data;
                 return {
                     ...data,
-                    pages: data.pages.map((page) => ({
+                    pages: old.pages.map((page) => ({
                         ...page,
                         items: page.items.filter((item) => item.id !== input.noteId),
                     })),
                 };
             });
+
+            return { oldData: old };
+        },
+        onSuccess: () => {
             toast({ title: "Note deleted" });
+        },
+        onError: (err, __, context) => {
+            console.error(err);
+            if (!context?.oldData) return;
+            trpcContext.notes.getNotes.setInfiniteData({ orderBy: "desc", limit: 25 }, context.oldData);
+            toast({ title: "Failed to delete note", status: "error" });
+        },
+        // Always refetch after error or success:
+        onSettled: () => {
+            trpcContext.notes.getNotes.invalidate();
         },
     });
 
