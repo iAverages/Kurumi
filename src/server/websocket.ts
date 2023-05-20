@@ -23,6 +23,7 @@ export const initWebsocketServer = (server: WebsocketServer) => {
         if (!session) {
             return next(new Error("Authentication error"));
         }
+        socket.handshake.auth.userId = session.userId;
         next();
     });
 
@@ -78,7 +79,7 @@ export const initWebsocketServer = (server: WebsocketServer) => {
                     id,
                 },
             });
-            if (!note) {
+            if (!note || note.deletedAt !== null || note.userId !== socket.handshake.auth.userId) {
                 callback({ success: false, error: "Note not found" });
                 return;
             }
