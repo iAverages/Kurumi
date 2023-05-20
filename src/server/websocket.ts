@@ -11,12 +11,13 @@ type ActiveNote = { data: Notes; lastUpdate: number; updates: number };
 export const initWebsocketServer = (server: WebsocketServer) => {
     server.use(async (socket, next) => {
         const cookies = parse(socket.handshake.headers.cookie ?? "");
-        if (cookies["next-auth.session-token"] === undefined) {
+        const token = cookies["next-auth.session-token"] || cookies["__Secure-next-auth.session-token"];
+        if (token === undefined) {
             return next(new Error("Authentication error"));
         }
         const session = await prisma.session.findUnique({
             where: {
-                sessionToken: cookies["next-auth.session-token"],
+                sessionToken: token,
             },
         });
         if (!session) {
