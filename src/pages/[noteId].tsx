@@ -1,48 +1,114 @@
+import { useColorMode } from "@chakra-ui/react";
+import { ExcalidrawElement } from "@excalidraw/excalidraw/types/element/types";
+import { AppState, BinaryFiles } from "@excalidraw/excalidraw/types/types";
+import { Notes } from "@prisma/client";
 import Head from "next/head";
-import Editor from "../components/editor";
-import dbConnect from "../database/connect";
-import Note, { INote } from "../database/models/Note";
-import Nav from "../components/navbar";
-import ErrorBox from "../components/errorBox";
-import NoteTitle from "../components/NoteTitle";
-import { Box } from "@chakra-ui/react";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Excalidraw from "~/components/excalidraw";
+import Monaco from "~/components/monaco";
+import Nav from "~/components/navbar";
+import NoteTitle from "~/components/navTitle";
+import { Show } from "~/components/show";
+import useBoolean from "~/hooks/useBoolean";
+import { useWebsocket } from "~/hooks/useWebsocket";
 
-interface NoteProps {
-    note: INote;
-    errored: boolean;
-}
+const Note = () => {
+    const router = useRouter();
+    const { socket } = useWebsocket();
+    const { value: usingExcalidraw, on: enableExcalidraw, off: disableExcalidraw } = useBoolean();
+    const [data, setData] = useState<Notes>();
+    const { colorMode } = useColorMode();
+    const { noteId } = router.query;
 
-const NotePage = ({ note, errored }: NoteProps) => {
-    const [title, setTitle] = useState(note.name);
+    useEffect(() => {
+        if (!socket || !noteId) return;
+        if (data) return;
+        socket.emit("joinNote", { noteId: noteId as string });
+        socket.emit("getNote", noteId as string, (response) => {
+            if (response.success) {
+                setData(response.data);
+                return;
+            }
+            console.error(response.error ?? "Failed to get note");
+        });
+        return () => {
+            socket.emit("leaveNote", { noteId: noteId as string });
+        };
+    }, [socket, noteId, data]);
 
-    useEffect(() => setTitle(note.name?.substring(0, 50) + " | Kurumi"), [note, note.name]);
+    useEffect(() => {
+        socket.on("noteChanged", ({ data }) => {
+            setData((prev) => {
+                const newData = prev ?? data;
+                newData.content = prev?.content ?? data.content;
+                newData.excalidraw = prev?.excalidraw ?? data.excalidraw;
+                return newData;
+            });
+        });
+
+        socket.emit("joinNote", { noteId: noteId as string });
+
+        return () => {
+            socket.off("noteChanged");
+            socket.emit("leaveNote", { noteId: noteId as string });
+        };
+    }, [socket, noteId]);
+
+    const handleMonacoChange = (value: string | undefined) => {
+        if (!value) return;
+        socket.emit("noteUpdate", { noteId: noteId as string, text: value });
+    };
+
+    const handleExcalidrawChange = (elements: readonly ExcalidrawElement[], appState: AppState, files: BinaryFiles) => {
+        if (!usingExcalidraw) return;
+        // Saving collaborators to db is not needed, it breaks excalidraw
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { collaborators, ...restAppState } = appState;
+
+        socket.emit("drawUpdate", {
+            noteId: noteId as string,
+            value: JSON.stringify({ appState: restAppState, files, elements }),
+        });
+    };
 
     return (
-        <div style={{ height: "100%" }}>
-            <Head>
-                <title>{title}</title>
-                <meta name="description" content={note.body?.substring(0, 150) ?? "Note has no body"} />
-            </Head>
-            <Box h={"100%"}>
-                <Nav title={<NoteTitle note={note} />} />
-                {errored ? <ErrorBox text={"Error occured fetching note"} /> : <Editor content={note.body} />}
-            </Box>
-        </div>
+        <Show when={data}>
+            {(note) => (
+                <>
+                    <Head>
+                        <title>{note.title} | Kurumi Notes</title>
+                        <meta name="description" content="Simple note taking app" />
+                        <link rel="icon" href="/favicon.ico" />
+                    </Head>
+                    <div className={"h-screen w-screen"}>
+                        <Nav
+                            title={<NoteTitle note={note} />}
+                            icons={
+                                <Show
+                                    when={!usingExcalidraw}
+                                    fallback={<button onClick={disableExcalidraw}>Markdown</button>}
+                                >
+                                    <button onClick={enableExcalidraw}>Excalidraw</button>
+                                </Show>
+                            }
+                        />
+                        <Show
+                            when={!usingExcalidraw}
+                            fallback={
+                                <Excalidraw
+                                    initialData={JSON.parse(note.excalidraw ?? "{}")}
+                                    onChange={handleExcalidrawChange}
+                                />
+                            }
+                        >
+                            <Monaco value={note.content} onChange={handleMonacoChange} colorMode={colorMode} />
+                        </Show>
+                    </div>
+                </>
+            )}
+        </Show>
     );
 };
 
-export async function getServerSideProps({ params }: any) {
-    const connected = await dbConnect();
-    let note: object = {};
-    if (connected) {
-        try {
-            note = (await Note.findById(params.noteId)) ?? {};
-        } catch (e) {
-            // No note found
-        }
-    }
-    return { props: { errored: !connected, note: JSON.parse(JSON.stringify(note)) } };
-}
-
-export default NotePage;
+export default Note;

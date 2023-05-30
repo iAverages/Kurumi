@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { FC } from "react";
 import Link from "next/link";
-import { useWebsocket } from "../hooks/useWebsocket";
+import { useWebsocket } from "~/hooks/useWebsocket";
 import { MoonIcon, SunIcon, ArrowBackIcon, CheckIcon, CloseIcon } from "@chakra-ui/icons";
 import {
     Box,
@@ -26,25 +26,34 @@ import {
     PopoverBody,
     Text,
 } from "@chakra-ui/react";
+import { env } from "~/env/client.mjs";
+import { signOut, useSession } from "next-auth/react";
 
 interface IndexProps {
     title: string | ReactNode;
+    icons?: ReactNode;
 }
 
-const Nav: FC<IndexProps> = ({ title }) => {
+const Nav: FC<IndexProps> = ({ title, icons }) => {
     const { colorMode, toggleColorMode } = useColorMode();
     const { connected } = useWebsocket();
+    const { data } = useSession();
 
     return (
         <Box bg={useColorModeValue("gray.100", "gray.900")} px={4}>
             <Flex h={16} alignItems={"center"} justifyContent={"space-between"}>
-                <Link href={"/"}>
-                    <Button>{<ArrowBackIcon />}</Button>
-                </Link>
-                <Box>{title}</Box>
+                <Box w={"33%"}>
+                    <Link href={"/"}>
+                        <Button>{<ArrowBackIcon />}</Button>
+                    </Link>
+                </Box>
+                <Flex w={"33%"} justifyContent={"center"}>
+                    {title}
+                </Flex>
 
-                <Flex alignItems={"center"}>
+                <Flex alignItems={"center"} w={"33%"} flexDirection={"row-reverse"}>
                     <Stack direction={"row"} spacing={7}>
+                        {icons}
                         <Popover>
                             <PopoverTrigger>
                                 <Button
@@ -69,22 +78,22 @@ const Nav: FC<IndexProps> = ({ title }) => {
 
                         <Menu>
                             <MenuButton as={Button} rounded={"full"} variant={"link"} cursor={"pointer"} minW={0}>
-                                <Avatar size={"sm"} src={"https://cdn.avrg.dev/screenshots/pfp.jpg"} />
+                                <Avatar size={"sm"} src={data?.user?.image ?? ""} />
                             </MenuButton>
                             <MenuList alignItems={"center"}>
                                 <br />
                                 <Center>
-                                    <Avatar size={"2xl"} src={"https://cdn.avrg.dev/screenshots/pfp.jpg"} />
+                                    <Avatar size={"2xl"} src={data?.user?.image ?? ""} />
                                 </Center>
                                 <br />
                                 <Center>
-                                    <p>dan</p>
+                                    <p>{data?.user?.name ?? "No Name"}</p>
                                 </Center>
                                 <br />
                                 <MenuDivider />
-                                <Text marginLeft={2}>Commit: {process.env.COMMIT_HASH}</Text>
+                                <Text marginLeft={2}>Commit: {env.NEXT_PUBLIC_COMMIT_HASH ?? "Dev"}</Text>
                                 <MenuDivider />
-                                <MenuItem>Logout</MenuItem>
+                                <MenuItem onClick={() => signOut({ callbackUrl: "/login" })}>Logout</MenuItem>
                             </MenuList>
                         </Menu>
                     </Stack>

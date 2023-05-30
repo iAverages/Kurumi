@@ -1,24 +1,32 @@
 import "../styles/globals.css";
-import type { AppProps } from "next/app";
-import React, { useEffect } from "react";
-import { SocketManager } from "../components/socket";
+import { SessionProvider } from "next-auth/react";
+import type { Session } from "next-auth";
+import type { AppType } from "next/app";
+import { trpc } from "../utils/trpc";
 import { ChakraProvider } from "@chakra-ui/react";
+import { SocketManager } from "../components/socket";
+import OnlyAuthenticated from "../components/onlyAuthenticated";
+import Head from "next/head";
 
-function MyApp({ Component, pageProps }: AppProps) {
-    useEffect(() => {
-        // Starts websocket server
-        // Is there a better way to do this?
-        // I dont like it lol
-        fetch("/api/socket");
-    }, []);
-
+const MyApp: AppType<{ session: Session | null }> = ({ Component, pageProps: { session, ...pageProps } }) => {
     return (
-        <SocketManager>
-            <ChakraProvider>
-                <Component {...pageProps} />
-            </ChakraProvider>
-        </SocketManager>
+        <>
+            <Head>
+                <title>Kurumi Notes</title>
+                <meta name="description" content="Simple note taking app" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+            <SocketManager>
+                <ChakraProvider>
+                    <SessionProvider session={session}>
+                        <OnlyAuthenticated>
+                            <Component {...pageProps} />
+                        </OnlyAuthenticated>
+                    </SessionProvider>
+                </ChakraProvider>
+            </SocketManager>
+        </>
     );
-}
+};
 
-export default MyApp;
+export default trpc.withTRPC(MyApp);

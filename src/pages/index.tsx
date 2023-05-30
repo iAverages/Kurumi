@@ -1,149 +1,187 @@
-import { FC, useEffect, useState } from "react";
 import type { NextPage } from "next";
-import Head from "next/head";
-import { DeleteIcon } from "@chakra-ui/icons";
-import { Button, useToast } from "@chakra-ui/react";
-import Router from "next/router";
-import Nav from "../components/navbar";
-import Note, { INote } from "../database/models/Note";
-import { Heading, Box, Text, Flex, Center, useColorModeValue, Avatar, Stack, Spacer, SimpleGrid } from "@chakra-ui/react";
-import dbConnect from "../database/connect";
-import ErrorBox from "../components/errorBox";
+import { Button, ButtonGroup, Portal, useOutsideClick, useToast } from "@chakra-ui/react";
+import { useRouter } from "next/router";
+import Nav from "~/components/navbar";
+import { Heading, Box, SimpleGrid } from "@chakra-ui/react";
+import { trpc } from "~/utils/trpc";
+import NoteBox from "~/components/noteBox";
+import { Show } from "~/components/show";
+import PageSpinner from "~/components/PageSpinner";
+import { Fragment, useRef, useState } from "react";
+import {
+    NumberInput,
+    NumberInputField,
+    NumberInputStepper,
+    NumberIncrementStepper,
+    NumberDecrementStepper,
+    Text,
+    Popover,
+    PopoverTrigger,
+    PopoverContent,
+    PopoverHeader,
+    PopoverBody,
+    PopoverFooter,
+    PopoverArrow,
+    PopoverCloseButton,
+} from "@chakra-ui/react";
+import useBoolean from "~/hooks/useBoolean";
 
-const NoteBox: FC<{ note: INote; removeNote: (id: string) => void }> = ({ note, removeNote }) => {
+const Home: NextPage = () => {
     const toast = useToast();
-    const handleClick = () => Router.push(`/${note._id}`);
+    const router = useRouter();
+    const { value: isSettingsOpen, off: closeSettings, toggle: toggleSettings } = useBoolean();
+    const [limit, setLimit] = useState(25);
+    const [orderBy, setOrderBy] = useState<"asc" | "desc">("desc");
+    const [sortSettings, setSortSettings] = useState({ orderBy, limit });
+    const settingsModalRef = useRef<HTMLElement>(null);
 
-    const handleDelete = async () => {
-        const response = await fetch("/api/note", {
-            method: "DELETE",
-            body: JSON.stringify({
-                id: note._id,
-            }),
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }).then((res) => res.json());
-        const success = response.success;
-        toast({
-            status: success ? "success" : "error",
-            title: success ? "Note was successfully deleted" : "Failed to delete note.",
-            isClosable: true,
-        });
-        removeNote(note._id);
-    };
+    useOutsideClick({
+        ref: settingsModalRef,
+        handler: closeSettings,
+    });
 
-    return (
-        <Center py={6}>
-            <Box
-                maxH={"255px"}
-                h={"full"}
-                w={"full"}
-                bg={useColorModeValue("white", "gray.900")}
-                boxShadow={"2xl"}
-                rounded={"md"}
-                p={6}
-                overflow={"hidden"}
-            >
-                <Stack>
-                    <Flex>
-                        <Text
-                            color={"green.500"}
-                            textTransform={"uppercase"}
-                            fontWeight={800}
-                            fontSize={"sm"}
-                            letterSpacing={1.1}
-                            alignSelf={"center"}
-                        >
-                            Private
-                        </Text>
-                        <Spacer />
-                        <Button alignSelf={"self-end"} _hover={{ bg: "red.300" }} onClick={handleDelete}>
-                            {<DeleteIcon />}
-                        </Button>
-                    </Flex>
-                    <Heading
-                        color={useColorModeValue("gray.700", "white")}
-                        fontSize={"2xl"}
-                        fontFamily={"body"}
-                        onClick={handleClick}
-                        _hover={{ cursor: "pointer" }}
-                    >
-                        {note.name}
-                    </Heading>
-                    <Text color={"gray.500"}>{(note.body === "" ? "Note is empty" : note.body).substring(0, 50)}</Text>
-                </Stack>
-                <Stack mt={6} direction={"row"} spacing={4} align={"center"}>
-                    {/* These are just temp until i setup accounts */}
-                    <Avatar src={"https://cdn.avrg.dev/screenshots/pfp.jpg"} />
-                    <Stack direction={"column"} spacing={0} fontSize={"sm"}>
-                        <Text fontWeight={600}>dan</Text>
-                        <Text color={"gray.500"}>{new Date(note.createdAt).toDateString()}</Text>
-                    </Stack>
-                </Stack>
-            </Box>
-        </Center>
-    );
-};
+    const createNote = trpc.notes.createNote.useMutation();
 
-const Home: NextPage<{ _notes: INote[]; errored: boolean }> = ({ _notes, errored }) => {
-    const [notes, setNotes] = useState<INote[]>(_notes ?? []);
+    const {
+        data,
+        error: fetchNotesErrored,
+        fetchNextPage,
+        refetch,
+        hasNextPage,
+        isInitialLoading,
+    } = trpc.notes.getNotes.useInfiniteQuery(sortSettings, {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+    });
 
-    useEffect(() => {
-        setNotes(_notes);
-    }, [_notes]);
+    const hasSettingsChanged = sortSettings.orderBy !== orderBy || sortSettings.limit !== limit;
 
     const handleCreateNote = async () => {
-        const response = await fetch("/api/note", {
-            method: "POST",
-        }).then((res) => res.json());
-        Router.push(response._id);
-    };
-
-    const removeNote = (id: string) => {
-        setNotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
+        const note = await createNote.mutateAsync();
+        await router.push(note.id);
+        toast({
+            title: "Note created",
+        });
     };
 
     return (
         <>
-            <Head>
-                <title>Notes</title>
-                <meta name="description" content="Note taking app" />
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
             <Nav title="Your Notes" />
             <Box paddingInline={"2rem"}>
-                {errored ? (
-                    <ErrorBox text={"Error occured fetching notes"} />
-                ) : (
-                    <>
-                        <Box display={"flex"} gap={"1rem"} mt={"1rem"} alignContent={"center"}>
-                            <Heading>Your Notes</Heading>
-                            <Button colorScheme="purple" onClick={handleCreateNote}>
-                                Create Note
-                            </Button>
-                        </Box>
-                        <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
-                            {notes?.map((note, idx) => (
-                                // Change this "removeNote"?
-                                <NoteBox key={idx} note={note} removeNote={removeNote} />
-                            ))}
-                        </SimpleGrid>
-                    </>
-                )}
+                <Show when={!isInitialLoading} fallback={<PageSpinner />}>
+                    <Show
+                        when={!fetchNotesErrored}
+                        fallback={
+                            <div>
+                                <div>Error occured fetching notes</div>
+                                <Button onClick={() => refetch()}>Retry</Button>
+                            </div>
+                        }
+                    >
+                        <>
+                            <Show when={data}>
+                                <Box display={"flex"} gap={"1rem"} mt={"1rem"} alignContent={"center"}>
+                                    <Heading>Your Notes</Heading>
+                                    <Button colorScheme="purple" onClick={handleCreateNote}>
+                                        Create Note
+                                    </Button>
+
+                                    <Popover isOpen={isSettingsOpen}>
+                                        <PopoverTrigger>
+                                            <Button onClick={toggleSettings}>Settings</Button>
+                                        </PopoverTrigger>
+                                        <Portal>
+                                            <PopoverContent ref={settingsModalRef}>
+                                                <PopoverArrow />
+                                                <PopoverHeader>View settings</PopoverHeader>
+                                                <PopoverCloseButton />
+                                                <PopoverBody className={"grid grid-cols-2 gap-2"}>
+                                                    <Text className={"flex items-center"}>Limit</Text>
+                                                    <NumberInput
+                                                        defaultValue={25}
+                                                        min={1}
+                                                        max={50}
+                                                        maxW="75px"
+                                                        onChange={(_, num) => setLimit(num)}
+                                                    >
+                                                        <NumberInputField />
+                                                        <NumberInputStepper>
+                                                            <NumberIncrementStepper />
+                                                            <NumberDecrementStepper />
+                                                        </NumberInputStepper>
+                                                    </NumberInput>
+                                                    <Text className={"flex items-center"}>Order By</Text>
+                                                    <ButtonGroup>
+                                                        <Button
+                                                            onClick={() => setOrderBy("asc")}
+                                                            colorScheme={orderBy === "asc" ? "blue" : "gray"}
+                                                        >
+                                                            Asc
+                                                        </Button>
+                                                        <Button
+                                                            onClick={() => setOrderBy("desc")}
+                                                            colorScheme={orderBy === "desc" ? "blue" : "gray"}
+                                                        >
+                                                            Desc
+                                                        </Button>
+                                                    </ButtonGroup>
+                                                </PopoverBody>
+                                                <PopoverFooter className={"flex gap-2"}>
+                                                    <Button
+                                                        colorScheme="green"
+                                                        onClick={() => {
+                                                            setSortSettings({ orderBy, limit });
+                                                        }}
+                                                        disabled={!hasSettingsChanged}
+                                                    >
+                                                        Apply
+                                                    </Button>
+                                                    <Button colorScheme="gray" disabled={!hasSettingsChanged}>
+                                                        Reset
+                                                    </Button>
+                                                </PopoverFooter>
+                                            </PopoverContent>
+                                        </Portal>
+                                    </Popover>
+                                </Box>
+                            </Show>
+                            <SimpleGrid minChildWidth="445px" w={"100%"} spacing="1rem">
+                                <Show
+                                    when={data}
+                                    fallback={
+                                        <div className={"flex w-full flex-col items-center justify-center gap-2"}>
+                                            <Heading size={"xl"}>No Notes Found</Heading>
+                                            <p>Click below to create your first note!</p>
+                                            <Button colorScheme="purple" onClick={handleCreateNote}>
+                                                Create First Note
+                                            </Button>
+                                        </div>
+                                    }
+                                >
+                                    {({ pages }) => (
+                                        <>
+                                            {pages.map(({ items }, page) => (
+                                                <Fragment key={page}>
+                                                    {items.map((note, idx) => (
+                                                        <NoteBox key={`${page}-${idx}`} note={note} />
+                                                    ))}
+                                                </Fragment>
+                                            ))}
+                                        </>
+                                    )}
+                                </Show>
+                            </SimpleGrid>
+
+                            <Show when={data}>
+                                <Button disabled={!hasNextPage} onClick={() => fetchNextPage()}>
+                                    Load More Notes
+                                </Button>
+                            </Show>
+                        </>
+                    </Show>
+                </Show>
             </Box>
         </>
     );
 };
-
-export async function getServerSideProps() {
-    const connected = await dbConnect();
-    const notes = connected
-        ? await Note.find({
-              $or: [{ archived: { $exists: false } }, { archived: false }],
-          })
-        : [];
-    return { props: { errored: !connected, _notes: JSON.parse(JSON.stringify(notes.reverse())) } };
-}
 
 export default Home;
