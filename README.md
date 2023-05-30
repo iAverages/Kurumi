@@ -1,6 +1,6 @@
-# 📚 Kurumi [![Build Status](<https://ci.danielraybone.com/app/rest/builds/buildType:(id:Notes_Build)/statusIcon>)](https://ci.danielraybone.com/buildConfiguration/Notes_Build?mode=branches&guest=1)
+# 📚 Kurumi [![Build Status](<https://ci.danielraybone.com/app/rest/builds/buildType:(id:Notes_LintBuild)/statusIcon>)](https://ci.danielraybone.com/buildConfiguration/Notes_LintBuild?mode=branches&guest=1)
 
-A simple note taking web app built with NextJS, Monaco (VSCode Editor) and MongoDB.
+A simple note taking web app built with NextJS, Monaco (VSCode Editor), MySQL, tRPC and more cool shit.
 
 ## Development
 
@@ -28,32 +28,6 @@ Start NextJS server
 
 ```
 yarn start
-```
-
-### SSL
-
-For SSL support, you will need a webserver to reverse proxy the application. Any webserver can be used, a basic Nginx
-configuration is below:
-
-```nginx
-upstream notes {
-        server localhost:3000;
-}
-
-server {
-        listen 443 ssl http2;
-        listen [::]:443 ssl http2;
-        server_name notes.example.com;
-
-        ssl_certificate /etc/nginx/ssl/cert.pem;
-        ssl_certificate_key /etc/nginx/ssl/cert.key;
-        ssl_trusted_certificate /etc/nginx/ssl/origin_ca_rsa_root.pem;
-
-        location / {
-                proxy_set_header Host $http_host;
-                proxy_pass http://notes;
-        }
-}
 ```
 
 ## Features
