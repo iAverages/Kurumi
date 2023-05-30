@@ -1,6 +1,6 @@
 ##### DEPENDENCIES
 
-FROM node:18-alpine3.17 AS deps
+FROM node:20-alpine3.17 AS deps
 RUN apk add --no-cache libc6-compat openssl1.1-compat
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN yarn install --production --frozen-lockfile;
 
 ##### BUILDER
 
-FROM node:18-alpine3.17 AS builder
+FROM node:20-alpine3.17 AS builder
 
 ARG DATABASE_URL
 ARG NEXTAUTH_SECRET
@@ -47,7 +47,7 @@ RUN SKIP_ENV_VALIDATION=1 yarn build;
 
 ##### RUNNER
 
-FROM node:18-alpine3.17 AS runner
+FROM node:20-alpine3.17 AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
