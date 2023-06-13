@@ -108,6 +108,7 @@ export const initWebsocketServer = (server: WebsocketServer) => {
 
                 console.log("Created new active note", noteId);
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const note = activeNotes.get(noteId)!;
                 note.data.content = text;
                 note.lastUpdate = Date.now();
@@ -138,6 +139,7 @@ export const initWebsocketServer = (server: WebsocketServer) => {
 
                 console.log("Created new active note", noteId);
             } else {
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const note = activeNotes.get(noteId)!;
                 note.data.excalidraw = value;
                 note.lastUpdate = Date.now();
@@ -146,114 +148,6 @@ export const initWebsocketServer = (server: WebsocketServer) => {
             }
         });
     });
-
-    // server.on("connection", (socket) => {
-    //     console.log("New user connected to socket", socket.id);
-
-    //     socket.on("joinNote", ({ noteId }) => {
-    //         if (!noteId) return;
-    //         socket.join(noteId);
-    //         console.log(socket.id, "joined note", noteId);
-    //     });
-
-    //     socket.on("leaveNote", ({ noteId }) => {
-    //         if (!noteId) return;
-    //         socket.leave(noteId);
-    //         console.log(socket.id, "left note", noteId);
-    //     });
-
-    //     socket.on("getNote", async (id, callback) => {
-    //         console.log("getNote", id);
-    //         if (!id) return;
-    //         const activeNote = activeNotes.get(id);
-    //         console.log("activeNote", activeNote);
-    //         if (activeNote) {
-    //             callback(activeNote.data);
-    //             return;
-    //         }
-    //         const note = await prisma.notes.findUnique({
-    //             where: {
-    //                 id,
-    //             },
-    //         });
-    //         if (!note) return;
-    //         console.log("note", note);
-    //         return note;
-    //     });
-
-    //     socket.on("noteUpdate", async ({ excalidraw, noteId, text }) => {
-    //         if (!noteId) return;
-
-    //         socket.to(noteId).emit("noteChanged", { fromId: socket.id, text, excalidraw });
-    //         if (!activeNotes.has(noteId)) {
-    //             const note = await prisma.notes.findUnique({
-    //                 where: {
-    //                     id: noteId,
-    //                 },
-    //             });
-    //             if (!note) return;
-
-    //             activeNotes.set(noteId, {
-    //                 data: { ...note, excalidraw, content: text },
-    //                 lastUpdate: Date.now(),
-    //                 updates: 1,
-    //             });
-
-    //             console.log("Created new active note", noteId);
-    //         } else {
-    //             const note = activeNotes.get(noteId)!;
-    //             console.log("Before upadte", note);
-    //             note.data.excalidraw = excalidraw;
-    //             note.data.content = text;
-    //             note.lastUpdate = Date.now();
-    //             note.updates++;
-    //             console.log("after upadte", activeNotes);
-    //         }
-    //     });
-    // });
-
-    // server.on("connection", (socket) => {
-    //     console.log("Connected", socket.id);
-
-    //     socket.on("noteUpdate", async ({ noteId, text, excalidraw }) => {
-    //         let _saveNote: Partial<NoteData> | undefined = noteData.get(noteId);
-    //         console.log("Got note update", _saveNote);
-    //         if (!_saveNote) {
-    //             const saveDebouce = debouceSaveInit();
-    //             _saveNote = {
-    //                 debouce: saveDebouce,
-    //                 lastData: {
-    //                     content: text,
-    //                     excalidraw,
-    //                 },
-    //             };
-    //             console.log("Created new save debouce for ", noteId);
-    //         }
-
-    //         // Technically this doesnt meet the type requirements of NoteData
-    //         // since force is not defined, but I dont care
-    //         const saveNote = _saveNote as unknown as NoteData;
-    //         socket.to(noteId).emit("noteChanged", { fromId: socket.id, text, excalidraw });
-    //         const forceNoteSave = saveNote.debouce(noteId, { content: text });
-
-    //         noteData.set(noteId, { ...saveNote, force: forceNoteSave });
-    //     });
-
-    //     socket.on("joinNote", ({ noteId }) => {
-    //         socket.join(noteId);
-    //         console.log("Joined note", noteId);
-    //     });
-
-    //     socket.on("leaveNote", ({ noteId }) => {
-    //         socket.leave(noteId);
-    //         if (!socket.rooms.has(noteId)) {
-    //             const noteDate = noteData.get(noteId);
-    //             if (noteDate) {
-    //                 noteDate.force();
-    //             }
-    //         }
-    //     });
-    // });
 
     return server;
 };

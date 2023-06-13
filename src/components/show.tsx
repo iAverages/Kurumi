@@ -5,6 +5,7 @@ type MapNonNullable<T> = {
 };
 
 type ShowPropChild<T> =
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     | ((item: T extends ReadonlyArray<any> ? MapNonNullable<T> : NonNullable<T>) => ReactElement)
     | ReactElement;
 
@@ -40,6 +41,7 @@ export function Show<T>({ when, fallback, children }: ShowProps<T>) {
 
 function handleChildren<T>(children: ShowPropChild<T>, item: T) {
     if (children instanceof Function) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return children(item as any);
     } else {
         return children;
