@@ -18,15 +18,15 @@ yarn dev
 
 ## Deployment
 
-Build files
+Build Next.JS files & custom backend server.
 
-```
+```bash
 yarn build
 ```
 
-Start NextJS server
+Start Custom server
 
-```
+```bash
 yarn start
 ```
 
@@ -38,8 +38,8 @@ yarn start
 -   [x] Dark & light mode
 -   [x] Update notes via API
 -   [x] Private notes
+-   [x] Multi user (with profiles)
 -   [ ] Public notes
--   [ ] Multi user (with profiles)
 -   [ ] Note Templates
 -   [ ] Archived notes
 -   [ ] Revision system
