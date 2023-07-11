@@ -20,7 +20,7 @@
         "@excalidraw/excalidraw": "^0.15.0",
         "@monaco-editor/react": "^4.4.6",
         "@next-auth/prisma-adapter": "^1.0.4",
-        "@prisma/client": "^4.8.0",
+        "@prisma/client": "^5.0.0",
         "@t3-oss/env-nextjs": "^0.6.0",
         "@tanstack/react-query": "^4.20.4",
         "@trpc/client": "^10.7.0",
@@ -56,7 +56,7 @@
         "postcss": "^8.4.14",
         "prettier": "3.0.0",
         "prettier-plugin-tailwindcss": "^0.4.0",
-        "prisma": "^4.8.0",
+        "prisma": "^5.0.0",
         "tailwindcss": "^3.1.6",
         "tsx": "^3.12.1",
         "typescript": "^5.0.0"
