@@ -1406,26 +1406,26 @@
     use-sync-external-store "^1.2.0"
 
 "@trpc/client@^10.7.0":
-  version "10.36.0"
-  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-10.36.0.tgz#cb138f94e0c4a87df05f0300f7d63771daca1f5a"
-  integrity sha512-Qj1T4vwhEEeLgXCUHFT7S5fqytkNYAudHwZtooEZ+NN+yN/a5oDZy1wd5D/gkY9y+nO8JCSgc7P5KhLjwzdeVw==
+  version "10.37.0"
+  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-10.37.0.tgz#bf4354e5a538b1882d69b23905ad4290dbdabefd"
+  integrity sha512-7qgL6zpG1ieKuRaYGLK4PLZvXeJNNQtvr9sq97zhSpABZSl2oAs2s3lOBe63BP0ToMrYWQp6FmK4QEqO3fCVwA==
 
 "@trpc/next@^10.7.0":
-  version "10.36.0"
-  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-10.36.0.tgz#45ded85856e004301acf6d86da478b2c5b2a952d"
-  integrity sha512-R0DYUMXkzKGQy49vvVou1fqOu459D47OsejwhMUktTNadTpUAuaE8SM0mo9a/faK59NhdlihDvRGq74PHupIkQ==
+  version "10.37.0"
+  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-10.37.0.tgz#4eb062427f8b6cfcbec4f546e9dd4aeac17f2ff7"
+  integrity sha512-TzMAiuvsPCfSi1GcbhO8Es896hKc0MEc05MEDYNi4MI29Srm9ozd3fN8j47Hj7bXNRuMmW0DoD/9yeuDVHQJxg==
   dependencies:
     react-ssr-prepass "^1.5.0"
 
 "@trpc/react-query@^10.7.0":
-  version "10.36.0"
-  resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-10.36.0.tgz#d8726fad40af243c324a641aa663c122223562e0"
-  integrity sha512-ueIdfP/Xl4DIeBLMh6hEb0QdvcUjDZ+V+4lzIuztmkpRIvL4ZpwyBS7TGbKs+1EUwWu42AJB0t8n/LrtO6MxgQ==
+  version "10.37.0"
+  resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-10.37.0.tgz#7d3bfc712445ac6d6eea277109eb3e95134c0a5c"
+  integrity sha512-SDcTLzXllIMYbO2N/7gW9Fp3U0JjZqNKa+ivD3tBiC1a2Suyce5S56lEha86d9H0cuBolLr1gQlT0JbMev6Qkw==
 
 "@trpc/server@^10.7.0":
-  version "10.36.0"
-  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-10.36.0.tgz#5cbec49edaa8b59b97a4a3c6084c350a1e865bf7"
-  integrity sha512-9kwFeGBuihUPZT2wRv2cmTpSoI+sSGj0/lBwvtgIq1P0+ONpj5NJOcWlvYbpnr5nRxc/+44lM/mg4TnSuTd5Kg==
+  version "10.37.0"
+  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-10.37.0.tgz#d66282b28eedb236a28173522c202f76067a1e1b"
+  integrity sha512-zm1tXVPox/WXHqzFwB2CKkWlc+Hzca8edIuBaUyq155sXAgJWK46kbUf85RTkd6shsnSduYddcntdBezjyxKFw==
 
 "@types/cookie@^0.4.1":
   version "0.4.1"
