@@ -1,0 +1,10 @@
+{
+    "name": "api",
+    "private": true,
+    "version": "0.0.0",
+    "license": "MIT",
+    "scripts": {
+        "cargo": "cargo",
+        "dev": "cargo watch -x run"
+    }
+}

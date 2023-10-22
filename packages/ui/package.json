@@ -1,0 +1,22 @@
+{
+  "name": "ui",
+  "version": "0.0.0",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "license": "MIT",
+  "scripts": {
+    "lint": "eslint .",
+    "generate:component": "turbo gen react-component"
+  },
+  "devDependencies": {
+    "@turbo/gen": "^1.10.12",
+    "@types/node": "^20.5.2",
+    "eslint-config-custom": "*",
+    "solid-js": "^1.7.8",
+    "tsconfig": "*",
+    "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "tailwind": "^4.0.0"
+  }
+}
