@@ -7,7 +7,8 @@
         "desktop": "yarn workspace desktop",
         "web": "yarn workspace web",
         "api": "yarn workspace api",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\""
+        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+        "desktop:dev": "yarn turbo --filter api --filter desktop dev"
     },
     "devDependencies": {
         "eslint": "^8.48.0",

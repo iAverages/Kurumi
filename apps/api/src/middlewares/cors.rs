@@ -31,10 +31,7 @@ pub async fn cors_middleware<T: std::fmt::Debug>(
         .to_str()
         .expect("origin header should be a string");
 
-    if LOCALHOST_RE.is_match(origin)
-        || origin.starts_with("https://chat.abbyani.com")
-        || origin.starts_with("https://tauri.localhost")
-    {
+    if LOCALHOST_RE.is_match(origin) || origin.starts_with("https://tauri.localhost") {
         let response = match request.method() == Method::OPTIONS {
             true => None,
             false => Some(next.run(request).await),

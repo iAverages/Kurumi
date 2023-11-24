@@ -43,3 +43,30 @@ impl IntoResponse for User {
         (axum::http::StatusCode::OK, body).into_response()
     }
 }
+
+#[derive(sqlx::FromRow, Serialize, Deserialize, Clone)]
+pub struct CurrentUser {
+    pub id: String,
+    pub name: String,
+    pub email: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}
+
+#[derive(sqlx::FromRow, Serialize, Deserialize)]
+pub struct Session {
+    pub id: String,
+    pub user_id: String,
+    pub expires_at: chrono::NaiveDateTime,
+    pub created_at: chrono::NaiveDateTime,
+}
+
+#[derive(sqlx::FromRow, Serialize, Deserialize)]
+pub struct Note {
+    pub id: String,
+    pub user_id: String,
+    pub title: String,
+    pub content: String,
+    pub created_at: chrono::NaiveDateTime,
+    pub updated_at: chrono::NaiveDateTime,
+}

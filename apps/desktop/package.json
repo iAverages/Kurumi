@@ -3,21 +3,37 @@
     "version": "0.0.0",
     "description": "",
     "scripts": {
-        "start": "vite",
+        "start": "vite ",
         "dev": "tauri dev",
-        "dev:vite": "vite",
+        "dev:vite": "vite --host",
         "build": "vite build",
         "serve": "vite preview",
         "tauri": "tauri"
     },
     "license": "MIT",
     "dependencies": {
+        "@codemirror/state": "^6.3.1",
+        "@codemirror/view": "^6.22.0",
         "@solidjs/router": "^0.8.3",
-        "@tauri-apps/api": "^1.5.0",
-        "solid-js": "^1.7.8"
+        "@t3-oss/env-core": "^0.7.1",
+        "@tanstack/solid-query": "^5.2.1",
+        "@tanstack/solid-query-devtools": "^5.2.1",
+        "@tauri-apps/api": "^2.0.0-alpha.8",
+        "@tauri-apps/plugin-shell": "^2.0.0-alpha.1",
+        "@tauri-apps/plugin-window": "^2.0.0-alpha.1",
+        "axios": "^1.5.1",
+        "clsx": "^2.0.0",
+        "socket.io-client": "^4.7.2",
+        "solid-codemirror": "^2.3.0",
+        "solid-js": "^1.7.8",
+        "tailwind-merge": "^2.0.0",
+        "zod": "^3.22.4"
     },
     "devDependencies": {
-        "@tauri-apps/cli": "^1.5.0",
+        "@tauri-apps/cli": "^2.0.0-alpha.9",
+        "autoprefixer": "^10.4.16",
+        "postcss": "^8.4.31",
+        "tailwindcss": "^3.3.3",
         "typescript": "^5.0.2",
         "vite": "^4.4.4",
         "vite-plugin-solid": "^2.7.0"

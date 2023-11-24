@@ -24,3 +24,6 @@ pbkdf2 = { version = "0.12.2", features = ["simple"] }
 hex = "0.4.3"
 sha2 = "0.10.8"
 axum-extra = { version = "0.8.0", features = ["cookie"] }
+time = "0.3.30"
+socketioxide = "0.6.0"
+tower = "0.4.13"

@@ -1,11 +1,12 @@
 use std::sync::Arc;
 
-use axum::{extract::State, response::IntoResponse, Json};
+use axum::{extract::State, http::Request, response::IntoResponse, Json};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use reqwest::StatusCode;
+use serde_json::json;
 
 use crate::{
-    helpers::hash_pass_hex,
+    helpers::{hash_pass_hex, json_response},
     types::{AppState, RegisterUser},
 };
 
@@ -37,15 +38,24 @@ pub async fn post(
             .as_database_error()
             .map(|err| {
                 if err.is_unique_violation() {
-                    return (StatusCode::CONFLICT, "User already exists").into_response();
+                    return json_response!(
+                        StatusCode::CONFLICT,
+                        { "message": "User already exists" }
+                    );
                 }
 
                 tracing::error!("Error creating user: {:?}", err);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
+                json_response!(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    { "message": "Internal Server Error" }
+                )
             })
             .unwrap_or_else(|| {
                 tracing::error!("Error creating user: {:?}", err);
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal Server Error").into_response()
+                json_response! (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    { "message": "Internal Server Error" }
+                )
             }),
     }
 }
