@@ -21,10 +21,6 @@ export const Home = () => {
         });
     });
 
-    createEffect(() => {
-        socket.manager.emit("note:join", { noteId: notes.data });
-    });
-
     onCleanup(() => {
         socket.manager.off("note:created");
     });

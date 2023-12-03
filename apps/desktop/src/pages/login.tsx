@@ -4,7 +4,7 @@ import { Button } from "../components/ui/button";
 import { Link, useNavigate } from "@solidjs/router";
 import { createMutation, useQueryClient } from "@tanstack/solid-query";
 import { useUser } from "../hooks/useUser";
-import { createEffect, createSignal } from "solid-js";
+import { Show, createEffect, createSignal } from "solid-js";
 import { z } from "zod";
 import { cn } from "../utils/ui";
 
@@ -82,6 +82,15 @@ export const Login = () => {
                                 "border-2 border-rose-500 dark:border-rose-500 ": formError().password !== "",
                             })}
                         />
+                        <Show when={formError().password !== ""}>
+                            {(data) => {
+                                console.log(data);
+                                return <span class={"text-red-500"}>{formError().password}</span>;
+                            }}
+
+                            {/* <span class={"text-red-500"}>{formError().password}</span> */}
+                        </Show>
+
                         {formError().password !== "" && <span class={"text-red-500"}>{formError().password}</span>}
                     </div>
                     <Button type={"submit"}>Login</Button>

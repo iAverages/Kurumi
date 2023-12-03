@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum::{extract::State, http::Request, response::IntoResponse, Json};
+use axum::{extract::State, response::IntoResponse, Json};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use reqwest::StatusCode;
 use serde_json::json;

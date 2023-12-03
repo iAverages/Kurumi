@@ -1,7 +1,7 @@
 export type Note = {
     id: string;
     title: string;
-    body: string;
+    content: string;
     createdAt: string;
     updatedAt: string;
 };

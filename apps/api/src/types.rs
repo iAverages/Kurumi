@@ -61,7 +61,7 @@ pub struct Session {
     pub created_at: chrono::NaiveDateTime,
 }
 
-#[derive(sqlx::FromRow, Serialize, Deserialize)]
+#[derive(sqlx::FromRow, Serialize, Deserialize, Debug, Clone)]
 pub struct Note {
     pub id: String,
     pub user_id: String,

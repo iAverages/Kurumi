@@ -1,8 +1,8 @@
 pub mod helpers;
 pub mod middlewares;
 pub mod routes;
+pub mod store;
 pub mod types;
-pub mod websocket;
 
 #[macro_use]
 extern crate lazy_static;
@@ -10,13 +10,15 @@ extern crate lazy_static;
 use axum::routing::post;
 use axum::{middleware, routing::get, Router};
 use dotenvy::dotenv;
+use socketioxide::extract::{AckSender, Data, SocketRef};
+use socketioxide::SocketIo;
 use sqlx::mysql::MySqlPoolOptions;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tower::ServiceBuilder;
 
 use crate::middlewares::{cors::cors_middleware, guard::guard, logger::logger_middleware};
-use crate::routes::{login, notes, register, user};
+use crate::routes::{login, notes, register, user, websocket};
 use crate::types::AppState;
 
 #[tokio::main]
@@ -35,7 +37,27 @@ async fn main() {
         reqwest_client: reqwest::Client::new(),
     });
 
-    let websocket_layer = websocket::create_websocket_handler().await.unwrap();
+    let (websocket_layer, io) = SocketIo::new_layer();
+
+    let app_state_clone = app_state.clone();
+
+    io.ns("/", move |socket: SocketRef| {
+        let app_state = app_state_clone.clone();
+        socket.on(
+            "note:join",
+            |socket: SocketRef, sender: AckSender, Data(data): Data<websocket::JoinNoteReq>| {
+                tokio::spawn(websocket::on_note_join(socket, sender, data, app_state));
+            },
+        );
+
+        let app_state = app_state_clone.clone();
+        socket.on(
+            "note:update",
+            move |socket: SocketRef, Data(data): Data<websocket::NoteUpdate>| {
+                tokio::spawn(websocket::on_note_update(socket, data, app_state));
+            },
+        );
+    });
 
     let app = Router::new()
         .layer(
@@ -43,6 +65,7 @@ async fn main() {
                 .layer(middleware::from_fn_with_state(app_state.clone(), guard))
                 .layer(websocket_layer),
         )
+        .route("/dan", get(user::dan))
         .nest(
             "/api/v1",
             Router::new()

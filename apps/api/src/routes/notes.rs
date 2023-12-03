@@ -24,3 +24,10 @@ pub async fn get_note_list(
     };
     json_response!(StatusCode::OK, { "notes": notes })
 }
+
+// #[axum::debug_handler]
+// pub async fn update_node(
+//     State(state): State<Arc<AppState>>,
+//     Extension(user): Extension<CurrentUser>,
+// ) -> impl IntoResponse {
+// }

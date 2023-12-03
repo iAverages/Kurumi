@@ -1,29 +1,55 @@
 import { useParams } from "@solidjs/router";
 import { useSocket } from "../context/socket";
-import { createEffect, onMount } from "solid-js";
-import { createCodeMirror } from "solid-codemirror";
+import { Match, Switch, createSignal, onCleanup, onMount } from "solid-js";
+import { createCodeMirror, createEditorControlledValue } from "solid-codemirror";
+import { Note } from "../types/notes";
 
-export const Notes = () => {
-    const params = useParams();
-
+const Editor = ({ note }: { note: Note }) => {
     const socket = useSocket();
+    const [editorContent, setEditorContent] = createSignal(note.content);
+    const { editorView, ref: editorRef } = createCodeMirror({
+        onValueChange: (value) => {
+            if (editorContent() === value) return;
+            socket.manager?.emit("note:update", { id: note.id, content: value });
+            setEditorContent(value);
+        },
+    });
+
+    createEditorControlledValue(editorView, editorContent);
 
     onMount(() => {
-        socket.manager?.emit("note:join", { noteId: params.id });
+        socket.manager?.on(`note:update:${note.id}`, (data) => {
+            setEditorContent(data.content);
+        });
     });
 
-    const { editorView, ref: editorRef } = createCodeMirror({
-        value: "",
+    onCleanup(() => {
+        socket.manager?.off(`note:update:${note.id}`);
     });
 
-    createEffect(() => {
-        // editorView.
+    return <div ref={editorRef} />;
+};
+export const Notes = () => {
+    const params = useParams();
+    const socket = useSocket();
+    const [data, setData] = createSignal<Note | null>(null);
+
+    onMount(() => {
+        socket.manager?.emit("note:join", { id: params.id }, (data: Note) => {
+            console.log("joined", data);
+            setData(data);
+        });
+    });
+
+    onCleanup(() => {
+        socket.manager?.emit("note:leave", { noteId: params.id });
     });
 
     return (
         <div>
-            <div class={"text-white"}>aedwa - {JSON.stringify(params)}</div>
-            <div ref={editorRef} />
+            <Switch fallback={<div class={"text-white"}>Loading...</div>}>
+                <Match when={data()}>{(d) => <Editor note={d()} />}</Match>
+            </Switch>
         </div>
     );
 };
