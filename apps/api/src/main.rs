@@ -9,6 +9,7 @@ extern crate lazy_static;
 
 use axum::routing::post;
 use axum::{middleware, routing::get, Router};
+use chrono::{DateTime, Utc};
 use dotenvy::dotenv;
 use socketioxide::extract::{AckSender, Data, SocketRef};
 use socketioxide::SocketIo;
@@ -20,6 +21,32 @@ use tower::ServiceBuilder;
 use crate::middlewares::{cors::cors_middleware, guard::guard, logger::logger_middleware};
 use crate::routes::{login, notes, register, user, websocket};
 use crate::types::AppState;
+
+async fn note_save_loop(app_state: Arc<AppState>) {
+    loop {
+        tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
+        let store = store::get_note_store().read().await;
+        let mut store = store.clone();
+        let store = store.iter_mut();
+        for (id, note) in store {
+            let now = Utc::now();
+            let diff = now - note.last_saved;
+            if diff.num_seconds() > 5 && note.needs_save {
+                tracing::info!("Saving note: {:?}", id);
+                note.last_saved = chrono::Utc::now();
+                note.needs_save = false;
+                sqlx::query!(
+                    "UPDATE notes SET content = ? WHERE id = ?",
+                    note.note.content,
+                    note.note.id
+                )
+                .execute(&app_state.db)
+                .await
+                .unwrap();
+            }
+        }
+    }
+}
 
 #[tokio::main]
 async fn main() {
@@ -36,6 +63,8 @@ async fn main() {
         db: pool.await.unwrap(),
         reqwest_client: reqwest::Client::new(),
     });
+
+    tokio::spawn(note_save_loop(app_state.clone()));
 
     let (websocket_layer, io) = SocketIo::new_layer();
 

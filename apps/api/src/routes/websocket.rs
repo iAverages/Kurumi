@@ -57,6 +57,7 @@ async fn get_active_note(id: String, state: Arc<AppState>) -> Result<ActiveNote,
     let active_note = db_note.map(|note| ActiveNote {
         note,
         last_saved: Utc::now(),
+        needs_save: false,
     });
 
     if let Some(active_note) = active_note {
@@ -100,6 +101,7 @@ pub async fn on_note_update(socket: SocketRef, data: NoteUpdate, state: Arc<AppS
             user_id: note.note.user_id.clone(),
         },
         last_saved: Utc::now(),
+        needs_save: true,
     };
 
     get_note_store().write().await.insert(id.clone(), note);
