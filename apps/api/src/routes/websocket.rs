@@ -10,14 +10,14 @@ use crate::{
 };
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct JoinNoteReq {
+pub struct JoinLeaveNoteReq {
     pub id: String,
 }
 
 pub async fn on_note_join(
     socket: SocketRef,
     sender: AckSender,
-    data: JoinNoteReq,
+    data: JoinLeaveNoteReq,
     app_state: Arc<AppState>,
 ) {
     tracing::info!("note:join: {:?}", data.id.clone());
@@ -33,6 +33,25 @@ pub async fn on_note_join(
             tracing::error!("note:join: {:?}", err);
         }
     }
+}
+
+pub async fn on_note_leave(socket: SocketRef, data: JoinLeaveNoteReq) {
+    tracing::info!("note:leave: {:?}", data.id);
+    let mut store = get_note_store().write().await;
+    let note = store.get(&data.id);
+
+    if let Some(note) = note {
+        let note = note.clone();
+        store.insert(
+            data.id.clone(),
+            ActiveNote {
+                has_active_sockets: false,
+                ..note
+            },
+        );
+    }
+
+    socket.leave(data.id).ok();
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -57,7 +76,7 @@ async fn get_active_note(id: String, state: Arc<AppState>) -> Result<ActiveNote,
     let active_note = db_note.map(|note| ActiveNote {
         note,
         last_saved: Utc::now(),
-        needs_save: false,
+        has_active_sockets: true,
     });
 
     if let Some(active_note) = active_note {
@@ -101,7 +120,7 @@ pub async fn on_note_update(socket: SocketRef, data: NoteUpdate, state: Arc<AppS
             user_id: note.note.user_id.clone(),
         },
         last_saved: Utc::now(),
-        needs_save: true,
+        has_active_sockets: true,
     };
 
     get_note_store().write().await.insert(id.clone(), note);

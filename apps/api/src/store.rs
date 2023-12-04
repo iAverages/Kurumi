@@ -10,7 +10,7 @@ use crate::types::Note;
 pub struct ActiveNote {
     pub note: Note,
     pub last_saved: DateTime<Utc>,
-    pub needs_save: bool,
+    pub has_active_sockets: bool,
 }
 
 static NOTE_STORE: OnceLock<RwLock<HashMap<String, ActiveNote>>> = OnceLock::new();

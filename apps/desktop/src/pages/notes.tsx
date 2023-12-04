@@ -1,6 +1,6 @@
 import { useParams } from "@solidjs/router";
 import { useSocket } from "../context/socket";
-import { Match, Switch, createSignal, onCleanup, onMount } from "solid-js";
+import { Match, Switch, createEffect, createSignal, onCleanup, onMount } from "solid-js";
 import { createCodeMirror, createEditorControlledValue } from "solid-codemirror";
 import { Note } from "../types/notes";
 
@@ -29,6 +29,7 @@ const Editor = ({ note }: { note: Note }) => {
 
     return <div ref={editorRef} />;
 };
+
 export const Notes = () => {
     const params = useParams();
     const socket = useSocket();
@@ -41,8 +42,13 @@ export const Notes = () => {
         });
     });
 
+    createEffect(() => {
+        console.log("note params", params.id);
+    });
+
     onCleanup(() => {
-        socket.manager?.emit("note:leave", { noteId: params.id });
+        console.log("leaving", params, data());
+        socket.manager?.emit("note:leave", { id: data()?.id });
     });
 
     return (

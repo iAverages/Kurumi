@@ -1,4 +1,4 @@
-import { For, createEffect, createSignal, onCleanup, onMount } from "solid-js";
+import { For, createSignal, onCleanup, onMount } from "solid-js";
 import { useSocket } from "../context/socket";
 import { useNotesList } from "../hooks/useNotesList";
 import { Link, Outlet } from "@solidjs/router";

@@ -9,7 +9,7 @@ extern crate lazy_static;
 
 use axum::routing::post;
 use axum::{middleware, routing::get, Router};
-use chrono::{DateTime, Utc};
+use chrono::Utc;
 use dotenvy::dotenv;
 use socketioxide::extract::{AckSender, Data, SocketRef};
 use socketioxide::SocketIo;
@@ -20,21 +20,21 @@ use tower::ServiceBuilder;
 
 use crate::middlewares::{cors::cors_middleware, guard::guard, logger::logger_middleware};
 use crate::routes::{login, notes, register, user, websocket};
+use crate::store::ActiveNote;
 use crate::types::AppState;
 
 async fn note_save_loop(app_state: Arc<AppState>) {
     loop {
         tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-        let store = store::get_note_store().read().await;
-        let mut store = store.clone();
-        let store = store.iter_mut();
-        for (id, note) in store {
+        let mut store = store::get_note_store().write().await;
+        let store_mut = store.clone();
+
+        for (id, note) in store_mut.iter() {
             let now = Utc::now();
             let diff = now - note.last_saved;
-            if diff.num_seconds() > 5 && note.needs_save {
-                tracing::info!("Saving note: {:?}", id);
-                note.last_saved = chrono::Utc::now();
-                note.needs_save = false;
+            if diff.num_seconds() > 5 || !note.has_active_sockets {
+                tracing::info!("Saving note: {:?}", id.clone());
+                let last_saved = chrono::Utc::now();
                 sqlx::query!(
                     "UPDATE notes SET content = ? WHERE id = ?",
                     note.note.content,
@@ -43,6 +43,23 @@ async fn note_save_loop(app_state: Arc<AppState>) {
                 .execute(&app_state.db)
                 .await
                 .unwrap();
+
+                store.insert(
+                    id.clone(),
+                    ActiveNote {
+                        note: note.note.clone(),
+                        last_saved,
+                        has_active_sockets: true,
+                    },
+                );
+            }
+
+            if !note.has_active_sockets {
+                tracing::info!(
+                    "No clients listening for {:?}, removing from store...",
+                    id.clone()
+                );
+                store.remove(id);
             }
         }
     }
@@ -64,9 +81,9 @@ async fn main() {
         reqwest_client: reqwest::Client::new(),
     });
 
-    tokio::spawn(note_save_loop(app_state.clone()));
-
     let (websocket_layer, io) = SocketIo::new_layer();
+
+    tokio::spawn(note_save_loop(app_state.clone()));
 
     let app_state_clone = app_state.clone();
 
@@ -74,8 +91,17 @@ async fn main() {
         let app_state = app_state_clone.clone();
         socket.on(
             "note:join",
-            |socket: SocketRef, sender: AckSender, Data(data): Data<websocket::JoinNoteReq>| {
+            |socket: SocketRef,
+             sender: AckSender,
+             Data(data): Data<websocket::JoinLeaveNoteReq>| {
                 tokio::spawn(websocket::on_note_join(socket, sender, data, app_state));
+            },
+        );
+
+        socket.on(
+            "note:leave",
+            |socket: SocketRef, Data(data): Data<websocket::JoinLeaveNoteReq>| {
+                tokio::spawn(websocket::on_note_leave(socket, data));
             },
         );
 
